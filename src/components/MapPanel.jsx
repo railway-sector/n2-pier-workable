@@ -57,7 +57,12 @@ import {
   overViewCenter,
 } from "../UniqueValues";
 import ActionPanel from "./ActionPanel";
-import { disableZooming, filterPileCapByCP, zoomToLayer } from "../Query";
+import {
+  disableZooming,
+  filterPileCapByCP,
+  layersVisibleFalse,
+  zoomToLayer,
+} from "../Query";
 import WorkablePileCapChart from "./WorkablePileCapChart";
 
 function MapPanel() {

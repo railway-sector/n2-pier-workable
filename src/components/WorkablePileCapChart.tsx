@@ -86,7 +86,7 @@ const WorkablePileCapChart = () => {
     pieSeries.children.push(
       am5.Label.new(root, {
         text: "[#000000]{valueSum}[/]\n[fontSize: 0.4em; #000000; verticalAlign: super]TOTAL PILE CAP[/]",
-        fontSize: "1.5em",
+        fontSize: "1.4em",
         centerX: am5.percent(50),
         centerY: am5.percent(40),
         populateText: true,

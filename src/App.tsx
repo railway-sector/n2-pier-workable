@@ -32,7 +32,7 @@ export const MyContext = createContext<MyDropdownContextType>({
 
 function App() {
   const [contractPackage, setContractPackage] = useState<any>(
-    contractPackageNamesList[0]
+    contractPackageNamesList[1]
   );
   const [component, setComponentNames] = useState<any>(componentNamesList[0]);
 

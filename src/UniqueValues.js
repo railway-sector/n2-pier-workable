@@ -3,7 +3,7 @@ import { SimpleMarkerSymbol } from "@arcgis/core/symbols";
 import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol";
 import Extent from "@arcgis/core/geometry/Extent";
 
-export const contractPackageNamesList = ["N-01", "N-02", "N-03", "N-04"];
+export const contractPackageNamesList = ["All", "N-01", "N-02", "N-03", "N-04"];
 export const componentNamesList = [
   "All",
   "Land",

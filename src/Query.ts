@@ -4,9 +4,12 @@ import {
   lotLayer_overview,
   nloLayer,
   nloLayer_overview,
+  pierNumberLayer_label_all,
+  pile_cap_renderer_all,
   pileCapLayer,
   pileCapLayer_overview,
   stripMapLayer,
+  stripMapLayer_overview,
   structureLayer,
   structureLayer_overview,
   utilityPointLayer,
@@ -87,7 +90,6 @@ export async function calculateWorkablePiers(contractp: any, component: any) {
     : component === "ISF"
     ? (workable_component = workable_fields[3])
     : (workable_component = workable_fields[4]);
-  console.log(workable_component);
 
   var total_count = new StatisticDefinition({
     onStatisticField: workable_component,
@@ -117,7 +119,8 @@ export async function calculateWorkablePiers(contractp: any, component: any) {
   });
 
   const query = pileCapLayer.createQuery();
-  const queryCP = "CP = '" + contractp + "'";
+  const queryCP = contractp === "All" ? "1=1" : "CP = '" + contractp + "'";
+
   query.where = queryCP;
   query.outStatistics = [
     total_count,
@@ -160,8 +163,10 @@ export async function calculateWorkablePiers(contractp: any, component: any) {
 
 // Filter Pile CAP by CP
 export function filterPileCapByCP(cp: any) {
-  const query_cp = "CP = '" + cp + "'";
-  const query_cp2 = "GroupId = '" + cp + "'";
+  // cp = cp === "All" ? "N-01" : cp;
+
+  const query_cp = cp === "All" ? "1=1" : "CP = '" + cp + "'";
+  const query_cp2 = cp === "All" ? "1=1" : "GroupId = '" + cp + "'";
   pileCapLayer.definitionExpression = query_cp;
   pileCapLayer_overview.definitionExpression = query_cp;
 
@@ -268,3 +273,15 @@ export function thousands_separators(num: any) {
     return 0;
   }
 }
+
+export const layersVisibleFalse = () => {
+  lotLayer.visible = false;
+  structureLayer.visible = false;
+  nloLayer.visible = false;
+  utilityPointLayer.visible = false;
+
+  lotLayer_overview.visible = false;
+  structureLayer_overview.visible = false;
+  nloLayer_overview.visible = false;
+  utilityPointLayer_overview.visible = false;
+};

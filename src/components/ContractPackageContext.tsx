@@ -16,7 +16,7 @@ export default function ContractPackageSegmentedList() {
   const { updateContractpackage } = use(MyContext);
 
   const [contractPackageSelected, setConractPackageSelected] = useState<any>(
-    contractPackageNamesList[0]
+    contractPackageNamesList[1]
   );
 
   return (

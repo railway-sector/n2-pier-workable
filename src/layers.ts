@@ -32,6 +32,7 @@ import {
   strip_map_uniqueValueInfos,
   util_marker_size,
   workable_fields,
+  workable_pier_point_uniqueValueInfos,
   workable_piers_uniqueValueInfos,
   yoffset_pierNumber,
 } from "./UniqueValues";
@@ -963,6 +964,107 @@ export const utilityPointLayer = new FeatureLayer({
   },
 });
 
+// Pier point layer
+// this layer is solely used to show AllWorkable status for
+// P-159, P-159NB/SB, P-160, P-160NB/SB
+export const pier_point_renderer_all = new UniqueValueRenderer({
+  field: workable_fields[0],
+  // defaultSymbol: defaultSymbolPierCap,
+  uniqueValueInfos: workable_pier_point_uniqueValueInfos,
+});
+
+export const monopile_label = new LabelClass({
+  symbol: new TextSymbol({
+    color: "black",
+    // haloColor: pier_number_halo_color,
+    // haloSize: pier_number_halo_size,
+    // yoffset: yoffset_pierNumber,
+    font: {
+      size: 9.5,
+      // weight: "bold",
+    },
+  }),
+  labelPlacement: "center-left",
+  labelExpressionInfo: {
+    expression: "'Monopile'",
+  },
+  // where: "AllWorkable = 0",
+});
+
+export const pier_point_label_workable_all = new LabelClass({
+  symbol: new TextSymbol({
+    color: color_workable,
+    haloColor: pier_number_halo_color,
+    haloSize: pier_number_halo_size,
+    font: {
+      size: 10,
+      weight: "bold",
+    },
+  }),
+  labelPlacement: "center-right",
+  labelExpressionInfo: {
+    expression: "$feature.PierNumber",
+  },
+  where: "AllWorkable = 0",
+});
+
+export const pier_point_label_nonworkable_all = new LabelClass({
+  symbol: new TextSymbol({
+    color: color_nonworkable,
+    haloColor: pier_number_halo_color,
+    haloSize: pier_number_halo_size,
+    font: {
+      size: 10,
+      weight: "bold",
+    },
+  }),
+  labelPlacement: "center-right",
+  labelExpressionInfo: {
+    expression: "$feature.PierNumber",
+  },
+  where: "AllWorkable = 1",
+});
+
+export const pier_point_label_completed_all = new LabelClass({
+  symbol: new TextSymbol({
+    color: color_completed,
+    haloColor: pier_number_halo_color,
+    haloSize: pier_number_halo_size,
+    font: {
+      size: 10,
+      weight: "bold",
+    },
+  }),
+  labelPlacement: "center-right",
+  labelExpressionInfo: {
+    expression: "$feature.PierNumber",
+  },
+  where: "AllWorkable = 2",
+});
+
+export const pierPointLayer = new FeatureLayer({
+  portalItem: {
+    id: "876de8483da9485aac5df737cbef2143",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  layerId: 6,
+  title: "Piers",
+  popupEnabled: false,
+  definitionExpression:
+    "PierNumber IN ('P-159', 'P-159NB', 'P-159SB', 'P-160', 'P-160NB', 'P-160SB')",
+  renderer: pier_point_renderer_all,
+  labelingInfo: [
+    pier_point_label_workable_all,
+    pier_point_label_nonworkable_all,
+    pier_point_label_completed_all,
+    monopile_label,
+  ],
+  minScale: 2500,
+  maxScale: 0,
+});
+
 ///////////////////////////////////////////////////////
 // ----------------- Overview Map ----------------//
 
@@ -1077,6 +1179,47 @@ export const structureLayer_overview = new FeatureLayer({
   elevationInfo: {
     mode: "on-the-ground",
   },
+});
+
+export const monopile_label_overview = new LabelClass({
+  symbol: new TextSymbol({
+    color: "black",
+    // haloColor: pier_number_halo_color,
+    // haloSize: pier_number_halo_size,
+    // yoffset: yoffset_pierNumber,
+    font: {
+      size: 9.5,
+      // weight: "bold",
+    },
+  }),
+  labelPlacement: "below-center",
+  labelExpressionInfo: {
+    expression: "'Monopile'",
+  },
+  where: "AllWorkable = 0 AND PierNumber = 'P-160SB'",
+});
+
+export const pierPointLayer_overview = new FeatureLayer({
+  portalItem: {
+    id: "876de8483da9485aac5df737cbef2143",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  layerId: 6,
+  title: "Piers",
+  popupEnabled: false,
+  definitionExpression:
+    "PierNumber IN ('P-159', 'P-159NB', 'P-159SB', 'P-160', 'P-160NB', 'P-160SB')",
+  renderer: pier_point_renderer_all,
+  labelingInfo: [
+    pier_point_label_workable_all,
+    pier_point_label_nonworkable_all,
+    pier_point_label_completed_all,
+    monopile_label_overview,
+  ],
+
+  maxScale: 0,
 });
 
 export const nloLayer_overview = new FeatureLayer({

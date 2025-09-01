@@ -44,6 +44,8 @@ import {
   structureLayer_overview,
   utilityPointLayer,
   utilityPointLayer_overview,
+  pierPointLayer,
+  pierPointLayer_overview,
 } from "../layers";
 import Extent from "@arcgis/core/geometry/Extent";
 import "@esri/calcite-components/dist/components/calcite-button";
@@ -148,6 +150,7 @@ function MapPanel() {
       arcgisMap.map.add(n2StationLayer);
       arcgisMap.map.add(cp_break_lines);
       arcgisMap.map.add(stripMapLayer);
+      arcgisMap.map.add(pierPointLayer);
 
       arcgisMapLegend.layerInfos = layerInfos;
       arcgisMapLegend.hideLayersNotInCurrentView = false;
@@ -274,6 +277,7 @@ function MapPanel() {
       arcgisOverviewMap.map.add(utilityPointLayer_overview);
       arcgisOverviewMap.map.add(n2StationLayer_overview);
       arcgisOverviewMap.map.add(stripMapLayer_overview);
+      arcgisOverviewMap.map.add(pierPointLayer_overview);
 
       // Disable all user navagating actions
       disableZooming(arcgisOverviewMap.view);

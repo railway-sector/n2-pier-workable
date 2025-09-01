@@ -77,6 +77,42 @@ export const workable_piers_uniqueValueInfos = [
   },
 ];
 
+export const workable_pier_point_uniqueValueInfos = [
+  {
+    value: 1,
+    label: "Non-Workable",
+    symbol: new SimpleMarkerSymbol({
+      color: color_nonworkable,
+      outline: {
+        width: 1,
+        color: "black",
+      },
+    }),
+  },
+  {
+    value: 0,
+    label: "Workable",
+    symbol: new SimpleMarkerSymbol({
+      color: color_workable,
+      outline: {
+        width: 1,
+        color: "black",
+      },
+    }),
+  },
+  {
+    value: 2,
+    label: "Completed",
+    symbol: new SimpleMarkerSymbol({
+      color: color_completed,
+      outline: {
+        width: 1,
+        color: "black",
+      },
+    }),
+  },
+];
+
 export const xoffset_pierNumber = 0;
 export const yoffset_pierNumber = 13;
 

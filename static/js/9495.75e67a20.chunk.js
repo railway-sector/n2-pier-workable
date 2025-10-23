@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkn2_pier_workable=self.webpackChunkn2_pier_workable||[]).push([[9495],{9495:(e,s,r)=>{r.r(s),r.d(s,{default:()=>o});var t=r(35143),a=r(46053),l=(r(81806),r(76460),r(47249),r(85842)),p=r(2190);let i=class extends p.A{constructor(){super(...arguments),this.type="wfs-3d"}};(0,t._)([(0,a.MZ)()],i.prototype,"layer",void 0),i=(0,t._)([(0,l.$)("esri.views.3d.layers.WFSLayerView3D")],i);const o=i}}]);
+//# sourceMappingURL=9495.75e67a20.chunk.js.map

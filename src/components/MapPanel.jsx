@@ -73,6 +73,7 @@ function MapPanel() {
   // Main Map
   const [mapView, setMapView] = useState();
   const arcgisMap = document.querySelector("#arcgis-map");
+  const arcgisOverviewMap = document.querySelector("#arcgis-overview-map");
 
   // Strip Map
   const [selectedStrip, setSelectedStrip] = useState(null);
@@ -272,37 +273,6 @@ function MapPanel() {
     }
   }, [contractPackage, component]);
 
-  //******************************************************** */
-  // Overview map
-  //******************************************************** */
-  const [mapOverview, setMapOverview] = useState();
-  const arcgisOverviewMap = document.querySelector("#arcgis-overview-map");
-
-  // Expand (Overview Map)
-  const arcgisOverviewMapExpand = document.querySelector("#overview-expanded");
-
-  // useEffect(() => {
-  //   if (mapOverview) {
-  //     console.log("Overview map is loaded.");
-  //     arcgisMap.view.ui.add(arcgisOverviewMapExpand, "bottom-right");
-  //     arcgisOverviewMap.map.add(prowLayer_overview);
-  //     arcgisOverviewMap.map.add(n2CenterlineOverView);
-  //     arcgisOverviewMap.map.add(lotLayer_overview);
-  //     arcgisOverviewMap.map.add(structureLayer_overview);
-  //     arcgisOverviewMap.map.add(pileCapLayer_overview);
-  //     arcgisOverviewMap.map.add(nloLayer_overview);
-  //     arcgisOverviewMap.map.add(utilityPointLayer_overview);
-  //     arcgisOverviewMap.map.add(n2StationLayer_overview);
-  //     arcgisOverviewMap.map.add(stripMapLayer_overview);
-  //     arcgisOverviewMap.map.add(pierPointLayer_overview);
-
-  //     // Disable all user navagating actions
-  //     disableZooming(arcgisOverviewMap.view);
-  //   }
-  // }, [arcgisMap]);
-
-  //************************************************************* *//
-  //************************************************************* *//
   // Feature Selection
   useEffect(() => {
     stripMapLayer.when(() => {
@@ -438,9 +408,9 @@ function MapPanel() {
               zoom="16"
               rotation="305"
               center={overViewCenter}
-              onarcgisViewReadyChange={(event) => {
-                setMapOverview(event.target);
-              }}
+              // onarcgisViewReadyChange={(event) => {
+              //   setMapOverview(event.target);
+              // }}
             ></arcgis-map>
           </div>
         </arcgis-expand>

@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkn2_pier_workable=self.webpackChunkn2_pier_workable||[]).push([[73620],{73620:(r,s,e)=>{e.d(s,{default:()=>l});var t=e(97002);class l extends t.p{constructor(){super(...arguments),this.errors=null}syntaxError(r,s,e,t,l,n){this.errors||(this.errors=[]),this.errors.push({line:e,column:t,msg:l,e:n})}}}}]);
+//# sourceMappingURL=73620.0962925c.chunk.js.map

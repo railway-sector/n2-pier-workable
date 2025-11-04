@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkn2_pier_workable=self.webpackChunkn2_pier_workable||[]).push([[60839],{60839:(e,r,b)=>{b.r(r),b.d(r,{build:()=>k.b});b(73398),b(86955),b(1920),b(2687);var k=b(25045)}}]);

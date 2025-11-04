@@ -155,6 +155,22 @@ function MapPanel() {
       arcgisMapLegend.layerInfos = layerInfos;
       arcgisMapLegend.hideLayersNotInCurrentView = false;
       arcgisMapLegend.respectLayerVisibilityDisabled = true;
+      arcgisMap.view.ui.components = [];
+
+      // Overview map
+      arcgisOverviewMap.map.add(prowLayer_overview);
+      arcgisOverviewMap.map.add(n2CenterlineOverView);
+      arcgisOverviewMap.map.add(lotLayer_overview);
+      arcgisOverviewMap.map.add(structureLayer_overview);
+      arcgisOverviewMap.map.add(pileCapLayer_overview);
+      arcgisOverviewMap.map.add(nloLayer_overview);
+      arcgisOverviewMap.map.add(utilityPointLayer_overview);
+      arcgisOverviewMap.map.add(n2StationLayer_overview);
+      arcgisOverviewMap.map.add(stripMapLayer_overview);
+      arcgisOverviewMap.map.add(pierPointLayer_overview);
+
+      // Disable all user navagating actions
+      disableZooming(arcgisOverviewMap.view);
     }
   });
 
@@ -265,24 +281,25 @@ function MapPanel() {
   // Expand (Overview Map)
   const arcgisOverviewMapExpand = document.querySelector("#overview-expanded");
 
-  useEffect(() => {
-    if (mapOverview) {
-      arcgisMap.view.ui.add(arcgisOverviewMapExpand, "bottom-right");
-      arcgisOverviewMap.map.add(prowLayer_overview);
-      arcgisOverviewMap.map.add(n2CenterlineOverView);
-      arcgisOverviewMap.map.add(lotLayer_overview);
-      arcgisOverviewMap.map.add(structureLayer_overview);
-      arcgisOverviewMap.map.add(pileCapLayer_overview);
-      arcgisOverviewMap.map.add(nloLayer_overview);
-      arcgisOverviewMap.map.add(utilityPointLayer_overview);
-      arcgisOverviewMap.map.add(n2StationLayer_overview);
-      arcgisOverviewMap.map.add(stripMapLayer_overview);
-      arcgisOverviewMap.map.add(pierPointLayer_overview);
+  // useEffect(() => {
+  //   if (mapOverview) {
+  //     console.log("Overview map is loaded.");
+  //     arcgisMap.view.ui.add(arcgisOverviewMapExpand, "bottom-right");
+  //     arcgisOverviewMap.map.add(prowLayer_overview);
+  //     arcgisOverviewMap.map.add(n2CenterlineOverView);
+  //     arcgisOverviewMap.map.add(lotLayer_overview);
+  //     arcgisOverviewMap.map.add(structureLayer_overview);
+  //     arcgisOverviewMap.map.add(pileCapLayer_overview);
+  //     arcgisOverviewMap.map.add(nloLayer_overview);
+  //     arcgisOverviewMap.map.add(utilityPointLayer_overview);
+  //     arcgisOverviewMap.map.add(n2StationLayer_overview);
+  //     arcgisOverviewMap.map.add(stripMapLayer_overview);
+  //     arcgisOverviewMap.map.add(pierPointLayer_overview);
 
-      // Disable all user navagating actions
-      disableZooming(arcgisOverviewMap.view);
-    }
-  }, [arcgisMap]);
+  //     // Disable all user navagating actions
+  //     disableZooming(arcgisOverviewMap.view);
+  //   }
+  // }, [arcgisMap]);
 
   //************************************************************* *//
   //************************************************************* *//
@@ -359,57 +376,57 @@ function MapPanel() {
           setMapView(event.target);
         }}
       >
-        <arcgis-compass position="top-left"></arcgis-compass>
+        <arcgis-compass slot="top-left"></arcgis-compass>
 
         {/* Printer widget */}
-        <arcgis-expand
-          position="top-left"
-          expandedIcon="print"
-          id="print-expand"
-        >
-          <arcgis-print position="top-left"></arcgis-print>
+        <arcgis-expand slot="top-left" expandedIcon="print" id="print-expand">
+          <arcgis-print
+          // slot="top-left"
+          // allowed-formats="all"
+          // allowed-layouts="all"
+          ></arcgis-print>
         </arcgis-expand>
 
         {/* Action Panel */}
         <arcgis-expand
-          position="top-right"
+          slot="top-right"
           mode="floating"
           id="actionpanel-expand"
+          // icon-number="2"
           expanded
-          close-on-esc
+          // close-on-esc
         >
-          <arcgis-placement>
+          <div style={{ maxHeight: "200px" }}>
             <ActionPanel id={actionPanelExpanded} />
-          </arcgis-placement>
+          </div>
         </arcgis-expand>
 
         {/* Chart */}
         <arcgis-expand
-          position="top-left"
+          slot="top-left"
           mode="floating"
           expandIcon="graph-pie-slice"
           close-on-esc
           expanded
         >
-          <arcgis-placement>
-            {arcgisMap && <WorkablePileCapChart />}
-          </arcgis-placement>
+          {arcgisMap && <WorkablePileCapChart />}
         </arcgis-expand>
 
         {/* Legend */}
         <arcgis-legend
-          position="bottom-right"
+          slot="bottom-right"
           id="arcgis-map-legend"
         ></arcgis-legend>
 
         {/*------------------------------------------------------------ */}
         {/* Overview Map */}
-        <arcgis-expand id="overview-expanded" position="bottom-right">
-          <arcgis-placement>
+        <arcgis-expand id="overview-expanded" slot="bottom-right">
+          <div>
             <arcgis-map
               style={{
-                width: "82.5vw",
+                width: "75.9vw",
                 height: "40vh",
+                position: "relative",
                 borderStyle: "solid",
                 borderColor: "grey",
                 borderWidth: "1.7px",
@@ -425,7 +442,7 @@ function MapPanel() {
                 setMapOverview(event.target);
               }}
             ></arcgis-map>
-          </arcgis-placement>
+          </div>
         </arcgis-expand>
       </arcgis-map>
     </>

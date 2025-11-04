@@ -197,7 +197,7 @@ export function disableZooming(view: any) {
 
   // exlude the zoom widget from the default UI
   // view.ui.components = [];
-  // overView.ui.components = [];
+  view.ui.components = [];
 
   // disable mouse wheel scroll zooming on the overView
   view?.on("mouse-wheel", stopEvtPropagation);

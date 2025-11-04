@@ -226,8 +226,10 @@ const WorkablePileCapChart = () => {
       <div
         id={chartID}
         style={{
-          height: "250px",
           width: "210px",
+          height: "260px",
+          position: "relative",
+
           backgroundColor: "#E1E1E1",
           borderStyle: "solid",
           borderWidth: "0.5px",

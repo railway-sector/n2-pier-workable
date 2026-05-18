@@ -1,0 +1,1 @@
+import{fY as e,fh as t}from"./index-MnOZKpD5.js";function n(f,u){return u.push(f.buffer),{buffer:f.buffer,layout:new e(f.layout)}}function o(f){return new t(f.layout).createView(f.buffer)}export{o as t,n as u};

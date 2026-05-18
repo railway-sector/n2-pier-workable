@@ -1,0 +1,491 @@
+/* eslint-disable jsx-a11y/alt-text */
+import { use, useEffect, useState } from "react";
+import "../index.css";
+import "@arcgis/map-components/dist/components/arcgis-map";
+import "@arcgis/map-components/components/arcgis-scene";
+import "@arcgis/map-components/components/arcgis-zoom";
+import "@arcgis/map-components/components/arcgis-legend";
+import "@arcgis/map-components/components/arcgis-basemap-gallery";
+import "@arcgis/map-components/components/arcgis-layer-list";
+import "@arcgis/map-components/components/arcgis-expand";
+import "@arcgis/map-components/components/arcgis-compass";
+import "@arcgis/map-components/components/arcgis-print";
+import {
+  basemapUserDefined,
+  cp_break_lines,
+  lotLayer,
+  lotLayer_overview,
+  monopilesLayer,
+  n2CenterlineOverView,
+  n2StationLayer,
+  n2StationLayer_overview,
+  nloLayer,
+  nloLayer_overview,
+  pierNumberLayer_label_all,
+  pierNumberLayer_label_land,
+  pierNumberLayer_label_nlo,
+  pierNumberLayer_label_others,
+  pierNumberLayer_label_struc,
+  pierNumberLayer_label_utility,
+  pile_cap_renderer_all,
+  pile_cap_renderer_land,
+  pile_cap_renderer_nlo,
+  pile_cap_renderer_others,
+  pile_cap_renderer_structure,
+  pile_cap_renderer_utility,
+  pileCapLayer,
+  pileCapLayer_overview,
+  prowLayer,
+  prowLayer_overview,
+  stripMapLayer,
+  stripMapLayer_overview,
+  structureLayer,
+  structureLayer_overview,
+  utilityPointLayer,
+  utilityPointLayer_overview,
+} from "../layers";
+import Extent from "@arcgis/core/geometry/Extent";
+import "@esri/calcite-components/dist/components/calcite-button";
+import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
+import { home_center, home_rotation, overViewCenter } from "../UniqueValues";
+import ActionPanel from "./ActionPanel";
+import { disableZooming, filterPileCapByCP, zoomToLayer } from "../Query";
+import WorkablePileCapChart from "./WorkablePileCapChart";
+import { MyContext } from "../contexts/MyContext";
+import type { ArcgisMap } from "@arcgis/map-components/dist/components/arcgis-map";
+import type { ArcgisLegend } from "@arcgis/map-components/components/arcgis-legend";
+
+function MapPanel() {
+  const { contractPackage, component } = use(MyContext);
+
+  // Main Map
+  const arcgisMap = document.querySelector("#arcgis-map") as ArcgisMap;
+  const [mapView, setMapView] = useState<any>();
+
+  // Overview Map
+  const arcgisOverviewMap = document.querySelector(
+    "#arcgis-overview-map",
+  ) as ArcgisMap;
+
+  // Strip Map
+  const [selectedStrip, setSelectedStrip] = useState(null);
+
+  // Expand (Action Panel)
+  const arcgisActionPanelExpand: any =
+    document.querySelector("actionpanel-expand");
+  const [actionPanelExpanded, setActionPanelExpanded] = useState(true);
+
+  reactiveUtils.when(
+    () => arcgisActionPanelExpand?.expanded === false,
+    () => setActionPanelExpanded(false),
+  );
+
+  reactiveUtils.when(
+    () => arcgisActionPanelExpand?.expanded === true,
+    () => setActionPanelExpanded(true),
+  );
+
+  // Legend
+  const arcgisMapLegend = document.querySelector(
+    "arcgis-legend",
+  ) as ArcgisLegend;
+  const layerInfos = [
+    {
+      layer: lotLayer,
+      title: "Land",
+    },
+    {
+      layer: structureLayer,
+      title: "Structure",
+    },
+    {
+      layer: nloLayer,
+      title: "NLO (Non-Land Owner)",
+    },
+    {
+      layer: utilityPointLayer,
+      title: "Utility Work (Incomplete)",
+    },
+    {
+      layer: stripMapLayer,
+      title: "Strip Map",
+    },
+    {
+      layer: pileCapLayer,
+      title: "Pile Cap",
+    },
+  ];
+
+  useEffect(() => {
+    if (contractPackage === "N-01") {
+      arcgisMap?.view
+        .goTo({
+          center: [120.7656353, 14.9174688],
+          zoom: 12,
+        })
+        .catch((err) => {
+          // A rejected view indicates a fatal error making it unable to display.
+          // Use the errback function to handle when the view doesn't load properly
+          console.error("MapView rejected:", err);
+        });
+    } else {
+      zoomToLayer(pileCapLayer, arcgisMap);
+    }
+  });
+
+  arcgisMap?.viewOnReady(() => {
+    console.log(mapView);
+    arcgisMap.view.ui.add(arcgisActionPanelExpand, "top-right");
+    arcgisMap?.map?.add(prowLayer);
+    arcgisMap?.map?.add(lotLayer);
+    arcgisMap?.map?.add(structureLayer);
+    arcgisMap?.map?.add(pileCapLayer);
+    arcgisMap?.map?.add(nloLayer);
+    arcgisMap?.map?.add(utilityPointLayer);
+    arcgisMap?.map?.add(n2StationLayer);
+    arcgisMap?.map?.add(cp_break_lines);
+    arcgisMap?.map?.add(stripMapLayer);
+    arcgisMap?.map?.add(monopilesLayer);
+    arcgisMap.hideAttribution = true;
+
+    arcgisMapLegend.layerInfos = layerInfos;
+    arcgisMapLegend.hideLayersNotInCurrentView = false;
+    arcgisMapLegend.ignoreLayerVisibility = true;
+
+    // Overview map
+    arcgisOverviewMap?.map?.add(prowLayer_overview);
+    arcgisOverviewMap?.map?.add(n2CenterlineOverView);
+    arcgisOverviewMap?.map?.add(lotLayer_overview);
+    arcgisOverviewMap?.map?.add(structureLayer_overview);
+    arcgisOverviewMap?.map?.add(pileCapLayer_overview);
+    arcgisOverviewMap?.map?.add(nloLayer_overview);
+    arcgisOverviewMap?.map?.add(utilityPointLayer_overview);
+    arcgisOverviewMap?.map?.add(n2StationLayer_overview);
+    arcgisOverviewMap?.map?.add(stripMapLayer_overview);
+    arcgisOverviewMap?.map?.add(monopilesLayer);
+    arcgisOverviewMap.hideAttribution = true;
+    arcgisOverviewMap && disableZooming(arcgisOverviewMap?.view);
+
+    const testArray = [
+      {
+        component: "All",
+        renderer: pile_cap_renderer_all,
+        label: pierNumberLayer_label_all,
+      },
+      {
+        component: "Land",
+        renderer: pile_cap_renderer_land,
+        label: pierNumberLayer_label_land,
+      },
+      {
+        component: "Structure",
+        renderer: pile_cap_renderer_structure,
+        label: pierNumberLayer_label_struc,
+      },
+      {
+        component: "ISF",
+        renderer: pile_cap_renderer_nlo,
+        label: pierNumberLayer_label_nlo,
+      },
+      {
+        component: "Utility",
+        renderer: pile_cap_renderer_utility,
+        label: pierNumberLayer_label_utility,
+      },
+      {
+        component: "Others",
+        renderer: pile_cap_renderer_utility,
+        label: pierNumberLayer_label_utility,
+      },
+    ];
+    console.log(testArray);
+
+    // const layers = [pileCapLayer, lotLayer];
+  });
+
+  useEffect(() => {
+    if (contractPackage || component) {
+      filterPileCapByCP(contractPackage);
+
+      if (component === "All") {
+        pileCapLayer.renderer = pile_cap_renderer_all;
+        pileCapLayer.labelingInfo = pierNumberLayer_label_all;
+        lotLayer.visible = true;
+        structureLayer.visible = true;
+        nloLayer.visible = true;
+        utilityPointLayer.visible = true;
+
+        // overview
+        pileCapLayer_overview.renderer = pile_cap_renderer_all;
+        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_all;
+        lotLayer_overview.visible = true;
+        structureLayer_overview.visible = true;
+        nloLayer_overview.visible = true;
+        utilityPointLayer_overview.visible = true;
+      } else if (component === "Land") {
+        pileCapLayer.renderer = pile_cap_renderer_land;
+        pileCapLayer.labelingInfo = pierNumberLayer_label_land;
+        lotLayer.visible = true;
+        structureLayer.visible = false;
+        nloLayer.visible = false;
+        utilityPointLayer.visible = false;
+
+        // overview
+        pileCapLayer_overview.renderer = pile_cap_renderer_land;
+        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_land;
+        lotLayer_overview.visible = true;
+        structureLayer_overview.visible = false;
+        nloLayer_overview.visible = false;
+        utilityPointLayer_overview.visible = false;
+      } else if (component === "Structure") {
+        pileCapLayer.renderer = pile_cap_renderer_structure;
+        pileCapLayer.labelingInfo = pierNumberLayer_label_struc;
+        lotLayer.visible = false;
+        structureLayer.visible = true;
+        nloLayer.visible = false;
+        utilityPointLayer.visible = false;
+
+        // Overview
+        pileCapLayer_overview.renderer = pile_cap_renderer_structure;
+        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_struc;
+        lotLayer_overview.visible = false;
+        structureLayer_overview.visible = true;
+        nloLayer_overview.visible = false;
+        utilityPointLayer_overview.visible = false;
+      } else if (component === "ISF") {
+        pileCapLayer.renderer = pile_cap_renderer_nlo;
+        pileCapLayer.labelingInfo = pierNumberLayer_label_nlo;
+        lotLayer.visible = false;
+        structureLayer.visible = false;
+        nloLayer.visible = true;
+        utilityPointLayer.visible = false;
+
+        // Overview
+        pileCapLayer_overview.renderer = pile_cap_renderer_nlo;
+        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_nlo;
+        lotLayer_overview.visible = false;
+        structureLayer_overview.visible = false;
+        nloLayer_overview.visible = true;
+        utilityPointLayer_overview.visible = false;
+      } else if (component === "Utility") {
+        pileCapLayer.renderer = pile_cap_renderer_utility;
+        pileCapLayer.labelingInfo = pierNumberLayer_label_utility;
+        lotLayer.visible = false;
+        structureLayer.visible = false;
+        nloLayer.visible = false;
+        utilityPointLayer.visible = true;
+
+        // Overview
+        pileCapLayer_overview.renderer = pile_cap_renderer_utility;
+        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_utility;
+        lotLayer_overview.visible = false;
+        structureLayer_overview.visible = false;
+        nloLayer_overview.visible = false;
+        utilityPointLayer_overview.visible = true;
+      } else if (component === "Others") {
+        pileCapLayer.renderer = pile_cap_renderer_others;
+        pileCapLayer.labelingInfo = pierNumberLayer_label_others;
+        lotLayer.visible = false;
+        structureLayer.visible = false;
+        nloLayer.visible = false;
+        utilityPointLayer.visible = false;
+
+        // Overview
+        pileCapLayer_overview.renderer = pile_cap_renderer_others;
+        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_others;
+        lotLayer_overview.visible = false;
+        structureLayer_overview.visible = false;
+        nloLayer_overview.visible = false;
+        utilityPointLayer_overview.visible = false;
+      }
+    }
+  }, [contractPackage, component]);
+
+  // Feature Selection
+  useEffect(() => {
+    stripMapLayer.when(() => {
+      arcgisMap?.view.on("click", (event) => {
+        arcgisMap?.view.hitTest(event).then((response) => {
+          const result: any = response.results[0];
+          // const title = result?.graphic.layer.title;
+          if (result) {
+            if (result.graphic.layer) {
+              const layer_name = result.graphic.layer.title;
+              if (layer_name === "Strip Map") {
+                // view rotate
+                arcgisMap.view.rotation = 305;
+
+                // overview new extent
+                const page_number = result.graphic.attributes["PageNumber"];
+                const angle = result.graphic.attributes["Angle"];
+                stripMapLayer_overview.definitionExpression =
+                  "PageNumber = " + page_number;
+
+                // const activeExtent = result?.graphic?.geometry?.extent.clone();
+                const xmax = result.graphic.geometry.extent.xmax;
+                const ymax = result.graphic.geometry.extent.ymax;
+                const xmin = result.graphic.geometry.extent.xmin;
+                const ymin = result.graphic.geometry.extent.ymin;
+
+                const new_extent = new Extent({
+                  xmax: xmax,
+                  ymax: ymax,
+                  xmin: xmin,
+                  ymin: ymin,
+                  spatialReference: {
+                    wkid: 102100,
+                  },
+                });
+
+                arcgisOverviewMap.extent = new_extent;
+                arcgisOverviewMap.rotation = 360 - angle;
+                arcgisOverviewMap.zoom = 17;
+
+                setSelectedStrip(result.graphic.attributes["OBJECTID"]);
+              }
+            }
+          }
+        });
+      });
+    });
+  });
+
+  // Higlight selected strip
+  useEffect(() => {
+    let highlight: any;
+    selectedStrip &&
+      arcgisMap?.whenLayerView(stripMapLayer).then((layerView) => {
+        highlight = layerView.highlight(selectedStrip);
+        arcgisMap?.view.on("click", () => {
+          highlight.remove();
+        });
+      });
+  }, [selectedStrip]);
+
+  return (
+    <arcgis-map
+      id="arcgis-map"
+      basemap={basemapUserDefined}
+      ground="world-elevation"
+      zoom={12}
+      center={home_center}
+      rotation={home_rotation}
+      // scale={home_scale}
+      onarcgisViewReadyChange={(event: any) => {
+        setMapView(event.target);
+      }}
+    >
+      <arcgis-compass slot="top-left"></arcgis-compass>
+
+      {/* Printer widget */}
+      <arcgis-expand slot="top-left" expandIcon="print" id="print-expand">
+        <arcgis-print></arcgis-print>
+      </arcgis-expand>
+
+      {/* Action Panel */}
+      <arcgis-expand
+        slot="top-right"
+        mode="floating"
+        id="actionpanel-expand"
+        expanded
+        // close-on-esc
+      >
+        <div style={{ maxHeight: "200px" }}>
+          <ActionPanel id={actionPanelExpanded} />
+        </div>
+      </arcgis-expand>
+
+      {/* Chart */}
+      <arcgis-expand
+        slot="top-left"
+        mode="floating"
+        expandIcon="graph-pie-slice"
+        close-on-esc
+        expanded
+      >
+        {arcgisMap && <WorkablePileCapChart />}
+      </arcgis-expand>
+
+      <arcgis-expand
+        slot="top-left"
+        mode="floating"
+        expandIcon="information"
+        close-on-esc
+        // expanded
+      >
+        <div style={{ width: "300px", paddingLeft: "20px" }}>
+          <p
+            style={{
+              fontWeight: "bold",
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            Useful Information
+          </p>
+          This smart map displays two things:
+          <ul>
+            <li>Worakbe pile caps, </li>
+            <li>
+              Obstructing lots, structures, households, utilities, and
+              others.{" "}
+            </li>
+          </ul>
+          <div style={{ paddingLeft: "20px" }}>
+            <li>
+              The source of data:{" "}
+              <b style={{ color: "black" }}>Master list tables</b> provided by
+              the RAP Team and N2 Civil Team.
+            </li>
+            <li>
+              {" "}
+              Frequency of updating information:{" "}
+              <b style={{ color: "black" }}>Weekly</b>.
+            </li>
+            <li>
+              {" "}
+              Note that obstructing utilities only include point features (e.g.,
+              utility poles) but not line feature (e.g., telecom line or
+              cables).
+            </li>
+          </div>
+        </div>
+      </arcgis-expand>
+
+      {/* Legend */}
+      <arcgis-legend
+        style={{ width: "70%" }}
+        slot="bottom-right"
+        // legendStyle="card"
+        // cardStyleLayout="stack"
+        id="arcgis-map-legend"
+      ></arcgis-legend>
+
+      {/*------------------------------------------------------------ */}
+      {/* Overview Map */}
+      <arcgis-expand id="overview-expanded" slot="bottom-right">
+        <div>
+          <arcgis-map
+            style={{
+              width: "75.9vw",
+              height: "40vh",
+              position: "relative",
+              borderStyle: "solid",
+              borderColor: "grey",
+              borderWidth: "1.7px",
+            }}
+            // referenceElement="arcgis-map"
+            id="arcgis-overview-map"
+            basemap={basemapUserDefined}
+            ground="world-elevation"
+            zoom={16}
+            rotation={305}
+            center={overViewCenter}
+          ></arcgis-map>
+        </div>
+      </arcgis-expand>
+    </arcgis-map>
+  );
+}
+
+export default MapPanel;

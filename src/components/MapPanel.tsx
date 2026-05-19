@@ -294,7 +294,7 @@ function MapPanel() {
       rotation={home_rotation}
       // scale={home_scale}
       onarcgisViewReadyChange={(event: any) => {
-        setMapView(event.target);
+        setMapView(event.target.id);
       }}
     >
       <arcgis-compass slot="top-left"></arcgis-compass>

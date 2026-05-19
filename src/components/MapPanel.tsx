@@ -149,7 +149,7 @@ function MapPanel() {
     arcgisOverviewMap?.map?.add(utilityPointLayer_overview);
     arcgisOverviewMap?.map?.add(n2StationLayer_overview);
     arcgisOverviewMap?.map?.add(stripMapLayer_overview);
-    arcgisOverviewMap?.map?.add(monopilesLayer);
+    // arcgisOverviewMap?.map?.add(monopilesLayer);
     arcgisOverviewMap.hideAttribution = true;
     arcgisOverviewMap && disableZooming(arcgisOverviewMap?.view);
   });

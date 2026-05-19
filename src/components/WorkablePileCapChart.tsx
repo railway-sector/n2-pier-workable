@@ -36,7 +36,7 @@ const WorkablePileCapChart = () => {
 
   useEffect(() => {
     pieChartStatusData({
-      qChart: `CP = '${contractPackage}'`,
+      qChart: contractPackage === "All" ? "1=1" : `CP = '${contractPackage}'`,
       layer: pileCapLayer,
       statusList: workableStatusArray,
       statusColor: workableStatusColor,

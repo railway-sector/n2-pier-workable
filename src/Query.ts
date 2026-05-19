@@ -5,29 +5,70 @@ import {
   lotLayer_overview,
   nloLayer,
   nloLayer_overview,
-  pileCapLayer,
-  pileCapLayer_overview,
-  stripMapLayer,
   structureLayer,
   structureLayer_overview,
   utilityPointLayer,
   utilityPointLayer_overview,
 } from "./layers";
 import { home_rotation } from "./UniqueValues";
+import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
-export const resizeObserverA = new ResizeObserver((entries: any) => {
-  for (let entry of entries) {
-    // entry.contentRect gives you the current width/height
-    const { width, height } = entry.contentRect;
+//---------------------------------------------------------//
+//    Definition Expression using queryExpression          //
+//---------------------------------------------------------//
+interface queryDefinitionExpressionType {
+  queryExpression?: string;
+  featureLayer1?: FeatureLayer | any; // pilecapLayer, pilecapLayer_overview
+  featureLayers2?:
+    | [FeatureLayer, FeatureLayer?, FeatureLayer?, FeatureLayer?, FeatureLayer?]
+    | any;
+  componentArray?: any;
+  componentSelected?: any;
+}
 
-    console.log(`Current size: ${width}px x ${height}px`);
+export function queryDefinitionExpression({
+  queryExpression,
+  featureLayer1,
+  featureLayers2,
+  componentArray,
+  componentSelected,
+}: queryDefinitionExpressionType) {
+  const find = componentArray.find(
+    (item: any) => item.component === componentSelected,
+  );
+  const new_renderer = find?.renderer;
+  const new_labelInfo = find?.labelInfo;
+  const new_visible_layer = find?.layerv;
 
-    // Example: Change background color if width is small
-    if (width < 500 && entry.target instanceof HTMLElement) {
-      entry.target.style.backgroundColor = "lightblue";
-    }
+  // pielcap layer
+  featureLayer1.definitionExpression = queryExpression;
+  featureLayer1.renderer = new_renderer;
+  featureLayer1.labelingInfo = new_labelInfo;
+
+  // definition Expression
+  featureLayers2.map((layer: any) => {
+    layer.definitionExpression = queryExpression;
+  });
+
+  // other layers
+  if (componentSelected === "All") {
+    featureLayers2.map((layer: any) => {
+      layer.visible = true;
+    });
+  } else if (componentSelected === "Others") {
+    featureLayers2.map((layer: any) => {
+      layer.visible = false;
+    });
+  } else {
+    featureLayers2.map((layer: any) => {
+      if (layer.title === new_visible_layer.title) {
+        layer.visible = true;
+      } else {
+        layer.visible = false;
+      }
+    });
   }
-});
+}
 
 //------------------------------------------------//
 //            Update As-of date                   //
@@ -88,26 +129,26 @@ export async function dateUpdate(category: any) {
 //------------------------------------------------//
 //             Filter Pile CAP by CP              //
 //------------------------------------------------//
-export function filterPileCapByCP(cp: any) {
-  // cp = cp === "All" ? "N-01" : cp;
+// export function filterPileCapByCP(cp: any) {
+//   // cp = cp === "All" ? "N-01" : cp;
 
-  const query_cp = cp === "All" ? "1=1" : "CP = '" + cp + "'";
-  const query_cp2 = cp === "All" ? "1=1" : "GroupId = '" + cp + "'";
-  pileCapLayer.definitionExpression = query_cp;
-  pileCapLayer_overview.definitionExpression = query_cp;
+//   const query_cp = cp === "All" ? "1=1" : "CP = '" + cp + "'";
+//   const query_cp2 = cp === "All" ? "1=1" : "GroupId = '" + cp + "'";
+//   pileCapLayer.definitionExpression = query_cp;
+//   pileCapLayer_overview.definitionExpression = query_cp;
 
-  lotLayer.definitionExpression = query_cp;
-  structureLayer.definitionExpression = query_cp;
-  nloLayer.definitionExpression = query_cp;
-  utilityPointLayer.definitionExpression = query_cp;
-  stripMapLayer.definitionExpression = query_cp + " OR " + query_cp2;
+//   lotLayer.definitionExpression = query_cp;
+//   structureLayer.definitionExpression = query_cp;
+//   nloLayer.definitionExpression = query_cp;
+//   utilityPointLayer.definitionExpression = query_cp;
+//   stripMapLayer.definitionExpression = query_cp + " OR " + query_cp2;
 
-  // Overview
-  lotLayer_overview.definitionExpression = query_cp;
-  structureLayer_overview.definitionExpression = query_cp;
-  nloLayer_overview.definitionExpression = query_cp;
-  utilityPointLayer_overview.definitionExpression = query_cp;
-}
+//   // Overview
+//   lotLayer_overview.definitionExpression = query_cp;
+//   structureLayer_overview.definitionExpression = query_cp;
+//   nloLayer_overview.definitionExpression = query_cp;
+//   utilityPointLayer_overview.definitionExpression = query_cp;
+// }
 
 //------------------------------------------------//
 //            Overview Map constraint             //

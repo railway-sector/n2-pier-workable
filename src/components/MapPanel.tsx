@@ -49,7 +49,11 @@ import "@esri/calcite-components/dist/components/calcite-button";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import { home_center, home_rotation, overViewCenter } from "../UniqueValues";
 import ActionPanel from "./ActionPanel";
-import { disableZooming, filterPileCapByCP, zoomToLayer } from "../Query";
+import {
+  disableZooming,
+  queryDefinitionExpression,
+  zoomToLayer,
+} from "../Query";
 import WorkablePileCapChart from "./WorkablePileCapChart";
 import { MyContext } from "../contexts/MyContext";
 import type { ArcgisMap } from "@arcgis/map-components/dist/components/arcgis-map";
@@ -116,23 +120,6 @@ function MapPanel() {
     },
   ];
 
-  useEffect(() => {
-    if (contractPackage === "N-01") {
-      arcgisMap?.view
-        .goTo({
-          center: [120.7656353, 14.9174688],
-          zoom: 12,
-        })
-        .catch((err) => {
-          // A rejected view indicates a fatal error making it unable to display.
-          // Use the errback function to handle when the view doesn't load properly
-          console.error("MapView rejected:", err);
-        });
-    } else {
-      zoomToLayer(pileCapLayer, arcgisMap);
-    }
-  });
-
   arcgisMap?.viewOnReady(() => {
     console.log(mapView);
     arcgisMap.view.ui.add(arcgisActionPanelExpand, "top-right");
@@ -165,141 +152,76 @@ function MapPanel() {
     arcgisOverviewMap?.map?.add(monopilesLayer);
     arcgisOverviewMap.hideAttribution = true;
     arcgisOverviewMap && disableZooming(arcgisOverviewMap?.view);
-
-    const testArray = [
-      {
-        component: "All",
-        renderer: pile_cap_renderer_all,
-        label: pierNumberLayer_label_all,
-      },
-      {
-        component: "Land",
-        renderer: pile_cap_renderer_land,
-        label: pierNumberLayer_label_land,
-      },
-      {
-        component: "Structure",
-        renderer: pile_cap_renderer_structure,
-        label: pierNumberLayer_label_struc,
-      },
-      {
-        component: "ISF",
-        renderer: pile_cap_renderer_nlo,
-        label: pierNumberLayer_label_nlo,
-      },
-      {
-        component: "Utility",
-        renderer: pile_cap_renderer_utility,
-        label: pierNumberLayer_label_utility,
-      },
-      {
-        component: "Others",
-        renderer: pile_cap_renderer_utility,
-        label: pierNumberLayer_label_utility,
-      },
-    ];
-    console.log(testArray);
-
-    // const layers = [pileCapLayer, lotLayer];
   });
 
   useEffect(() => {
-    if (contractPackage || component) {
-      filterPileCapByCP(contractPackage);
+    const test = [
+      {
+        component: "All",
+        renderer: pile_cap_renderer_all,
+        labelInfo: pierNumberLayer_label_all,
+      },
+      {
+        component: "Land",
+        layerv: lotLayer,
+        renderer: pile_cap_renderer_land,
+        labelInfo: pierNumberLayer_label_land,
+      },
+      {
+        component: "Structure",
+        layerv: structureLayer,
+        renderer: pile_cap_renderer_structure,
+        labelInfo: pierNumberLayer_label_struc,
+      },
+      {
+        component: "ISF",
+        layerv: nloLayer,
+        renderer: pile_cap_renderer_nlo,
+        labelInfo: pierNumberLayer_label_nlo,
+      },
+      {
+        component: "Utility",
+        layerv: utilityPointLayer,
+        renderer: pile_cap_renderer_utility,
+        labelInfo: pierNumberLayer_label_utility,
+      },
+      {
+        component: "Others",
+        renderer: pile_cap_renderer_others,
+        labelInfo: pierNumberLayer_label_others,
+      },
+    ];
 
-      if (component === "All") {
-        pileCapLayer.renderer = pile_cap_renderer_all;
-        pileCapLayer.labelingInfo = pierNumberLayer_label_all;
-        lotLayer.visible = true;
-        structureLayer.visible = true;
-        nloLayer.visible = true;
-        utilityPointLayer.visible = true;
+    const qe = contractPackage === "All" ? "1=1" : `CP = '${contractPackage}'`;
+    const qe2 =
+      contractPackage === "All" ? "1=1" : `GroupId = '${contractPackage}'`;
+    stripMapLayer.definitionExpression = `${qe} OR ${qe2}`;
 
-        // overview
-        pileCapLayer_overview.renderer = pile_cap_renderer_all;
-        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_all;
-        lotLayer_overview.visible = true;
-        structureLayer_overview.visible = true;
-        nloLayer_overview.visible = true;
-        utilityPointLayer_overview.visible = true;
-      } else if (component === "Land") {
-        pileCapLayer.renderer = pile_cap_renderer_land;
-        pileCapLayer.labelingInfo = pierNumberLayer_label_land;
-        lotLayer.visible = true;
-        structureLayer.visible = false;
-        nloLayer.visible = false;
-        utilityPointLayer.visible = false;
+    queryDefinitionExpression({
+      queryExpression: qe,
+      featureLayer1: pileCapLayer,
+      featureLayers2: [lotLayer, structureLayer, nloLayer, utilityPointLayer],
+      componentArray: test,
+      componentSelected: component,
+    });
 
-        // overview
-        pileCapLayer_overview.renderer = pile_cap_renderer_land;
-        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_land;
-        lotLayer_overview.visible = true;
-        structureLayer_overview.visible = false;
-        nloLayer_overview.visible = false;
-        utilityPointLayer_overview.visible = false;
-      } else if (component === "Structure") {
-        pileCapLayer.renderer = pile_cap_renderer_structure;
-        pileCapLayer.labelingInfo = pierNumberLayer_label_struc;
-        lotLayer.visible = false;
-        structureLayer.visible = true;
-        nloLayer.visible = false;
-        utilityPointLayer.visible = false;
-
-        // Overview
-        pileCapLayer_overview.renderer = pile_cap_renderer_structure;
-        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_struc;
-        lotLayer_overview.visible = false;
-        structureLayer_overview.visible = true;
-        nloLayer_overview.visible = false;
-        utilityPointLayer_overview.visible = false;
-      } else if (component === "ISF") {
-        pileCapLayer.renderer = pile_cap_renderer_nlo;
-        pileCapLayer.labelingInfo = pierNumberLayer_label_nlo;
-        lotLayer.visible = false;
-        structureLayer.visible = false;
-        nloLayer.visible = true;
-        utilityPointLayer.visible = false;
-
-        // Overview
-        pileCapLayer_overview.renderer = pile_cap_renderer_nlo;
-        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_nlo;
-        lotLayer_overview.visible = false;
-        structureLayer_overview.visible = false;
-        nloLayer_overview.visible = true;
-        utilityPointLayer_overview.visible = false;
-      } else if (component === "Utility") {
-        pileCapLayer.renderer = pile_cap_renderer_utility;
-        pileCapLayer.labelingInfo = pierNumberLayer_label_utility;
-        lotLayer.visible = false;
-        structureLayer.visible = false;
-        nloLayer.visible = false;
-        utilityPointLayer.visible = true;
-
-        // Overview
-        pileCapLayer_overview.renderer = pile_cap_renderer_utility;
-        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_utility;
-        lotLayer_overview.visible = false;
-        structureLayer_overview.visible = false;
-        nloLayer_overview.visible = false;
-        utilityPointLayer_overview.visible = true;
-      } else if (component === "Others") {
-        pileCapLayer.renderer = pile_cap_renderer_others;
-        pileCapLayer.labelingInfo = pierNumberLayer_label_others;
-        lotLayer.visible = false;
-        structureLayer.visible = false;
-        nloLayer.visible = false;
-        utilityPointLayer.visible = false;
-
-        // Overview
-        pileCapLayer_overview.renderer = pile_cap_renderer_others;
-        pileCapLayer_overview.labelingInfo = pierNumberLayer_label_others;
-        lotLayer_overview.visible = false;
-        structureLayer_overview.visible = false;
-        nloLayer_overview.visible = false;
-        utilityPointLayer_overview.visible = false;
-      }
-    }
+    queryDefinitionExpression({
+      queryExpression: qe,
+      featureLayer1: pileCapLayer_overview,
+      featureLayers2: [
+        lotLayer_overview,
+        structureLayer_overview,
+        nloLayer_overview,
+        utilityPointLayer_overview,
+      ],
+      componentArray: test,
+      componentSelected: component,
+    });
   }, [contractPackage, component]);
+
+  useEffect(() => {
+    zoomToLayer(pileCapLayer, arcgisMap);
+  }, [contractPackage]);
 
   // Feature Selection
   useEffect(() => {

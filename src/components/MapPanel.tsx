@@ -155,7 +155,7 @@ function MapPanel() {
   });
 
   useEffect(() => {
-    const test = [
+    const queryRenderArray = [
       {
         component: "All",
         renderer: pile_cap_renderer_all,
@@ -201,7 +201,7 @@ function MapPanel() {
       queryExpression: qe,
       featureLayer1: pileCapLayer,
       featureLayers2: [lotLayer, structureLayer, nloLayer, utilityPointLayer],
-      componentArray: test,
+      componentArray: queryRenderArray,
       componentSelected: component,
     });
 
@@ -214,7 +214,7 @@ function MapPanel() {
         nloLayer_overview,
         utilityPointLayer_overview,
       ],
-      componentArray: test,
+      componentArray: queryRenderArray,
       componentSelected: component,
     });
   }, [contractPackage, component]);
@@ -292,7 +292,6 @@ function MapPanel() {
       zoom={12}
       center={home_center}
       rotation={home_rotation}
-      // scale={home_scale}
       onarcgisViewReadyChange={(event: any) => {
         setMapView(event.target.id);
       }}
@@ -310,7 +309,6 @@ function MapPanel() {
         mode="floating"
         id="actionpanel-expand"
         expanded
-        // close-on-esc
       >
         <div style={{ maxHeight: "200px" }}>
           <ActionPanel id={actionPanelExpanded} />
@@ -333,7 +331,6 @@ function MapPanel() {
         mode="floating"
         expandIcon="information"
         close-on-esc
-        // expanded
       >
         <div style={{ width: "300px", paddingLeft: "20px" }}>
           <p
@@ -378,8 +375,6 @@ function MapPanel() {
       <arcgis-legend
         style={{ width: "70%" }}
         slot="bottom-right"
-        // legendStyle="card"
-        // cardStyleLayout="stack"
         id="arcgis-map-legend"
       ></arcgis-legend>
 
@@ -396,7 +391,6 @@ function MapPanel() {
               borderColor: "grey",
               borderWidth: "1.7px",
             }}
-            // referenceElement="arcgis-map"
             id="arcgis-overview-map"
             basemap={basemapUserDefined}
             ground="world-elevation"

@@ -7,7 +7,7 @@ import { chartRenderer } from "../ChartRenderer";
 import { pieChartStatusData } from "../ChartGenerator";
 import { pileCapLayer } from "../layers";
 import {
-  workable_fields,
+  name_to_workable_fields,
   workableStatusArray,
   workableStatusColor,
 } from "../UniqueValues";
@@ -35,23 +35,17 @@ const WorkablePileCapChart = () => {
   const chartID = "pie-two";
 
   useEffect(() => {
+    const status_statistic_field = name_to_workable_fields.filter(
+      (item: any) => item.name === component,
+    )[0].field;
+
     pieChartStatusData({
       qChart: contractPackage === "All" ? "1=1" : `CP = '${contractPackage}'`,
       layer: pileCapLayer,
       statusList: workableStatusArray,
       statusColor: workableStatusColor,
-      statusField:
-        component === "All"
-          ? workable_fields[0]
-          : component === "Land"
-            ? workable_fields[1]
-            : component === "Structure"
-              ? workable_fields[2]
-              : component === "ISF"
-                ? workable_fields[3]
-                : component === "Utility"
-                  ? workable_fields[4]
-                  : workable_fields[5],
+      statusField: status_statistic_field,
+      statisticField: status_statistic_field,
       statisticType: "count",
     }).then((result: any) => {
       setWorkableData(result[0]);

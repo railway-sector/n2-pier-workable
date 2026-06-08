@@ -35,6 +35,16 @@ export const workable_fields = [
   "UtilWorkable",
   "OthersWorkable",
 ];
+
+export const name_to_workable_fields: any = componentNamesList.map(
+  (name: any, index: any) => {
+    return Object.assign({
+      name: name,
+      field: workable_fields[index],
+    });
+  },
+);
+
 export const workableStatusLabels = ["Workable", "Non-Workable", "Completed"];
 export const workableStatusValues = [0, 1, 2];
 export const workableStatusColor = ["#38A800", "#FF0000", "#0070ff"];

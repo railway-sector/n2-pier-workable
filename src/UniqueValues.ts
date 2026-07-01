@@ -54,6 +54,7 @@ export const workableStatusArray = workableStatusLabels.map(
     return Object.assign({
       category: label,
       value: workableStatusValues[index],
+      color: workableStatusColor[index],
     });
   },
 );

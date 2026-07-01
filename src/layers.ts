@@ -34,6 +34,16 @@ import {
   workable_piers_uniqueValueInfos,
   yoffset_pierNumber,
 } from "./UniqueValues";
+import ChartPieSeries from "chart-pie-series";
+
+export const piechart = new ChartPieSeries(
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+);
 
 export const basemapUserDefined = new Basemap({
   baseLayers: [
@@ -1268,3 +1278,69 @@ export const dateTable = new FeatureLayer({
     },
   },
 });
+
+//--- Compile queryRenderArray for pile cap layer
+export const queryRenderArray = [
+  {
+    component: "All",
+    renderer: pile_cap_renderer_all,
+    labelInfo: pierNumberLayer_label_all,
+  },
+  {
+    component: "Land",
+    layerv: lotLayer,
+    renderer: pile_cap_renderer_land,
+    labelInfo: pierNumberLayer_label_land,
+  },
+  {
+    component: "Structure",
+    layerv: structureLayer,
+    renderer: pile_cap_renderer_structure,
+    labelInfo: pierNumberLayer_label_struc,
+  },
+  {
+    component: "ISF",
+    layerv: nloLayer,
+    renderer: pile_cap_renderer_nlo,
+    labelInfo: pierNumberLayer_label_nlo,
+  },
+  {
+    component: "Utility",
+    layerv: utilityPointLayer,
+    renderer: pile_cap_renderer_utility,
+    labelInfo: pierNumberLayer_label_utility,
+  },
+  {
+    component: "Others",
+    renderer: pile_cap_renderer_others,
+    labelInfo: pierNumberLayer_label_others,
+  },
+];
+
+//--- layerInfos for legend
+export const layerInfos = [
+  {
+    layer: lotLayer,
+    title: "Land",
+  },
+  {
+    layer: structureLayer,
+    title: "Structure",
+  },
+  {
+    layer: nloLayer,
+    title: "NLO (Non-Land Owner)",
+  },
+  {
+    layer: utilityPointLayer,
+    title: "Utility Work (Incomplete)",
+  },
+  {
+    layer: stripMapLayer,
+    title: "Strip Map",
+  },
+  {
+    layer: pileCapLayer,
+    title: "Pile Cap",
+  },
+];

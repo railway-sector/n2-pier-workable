@@ -12,6 +12,72 @@ import {
 } from "./layers";
 import { home_rotation } from "./UniqueValues";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import Extent from "@arcgis/core/geometry/Extent";
+
+//---------------------------------------------------------//
+//                 Add Layers to Map                      //
+//---------------------------------------------------------//
+export function addLayersToMap(map: any, layersList: any[]) {
+  layersList.forEach((layer: any) => {
+    map.add(layer);
+  });
+}
+
+//---------------------------------------------------------//
+//                 StripMap  Renderer                      //
+//---------------------------------------------------------//
+export async function stripMapRenderer(
+  layer: any,
+  overviewLayer: any,
+  map: any,
+  overviewMap: any,
+) {
+  await layer?.when();
+  map?.view.on("click", async (event: any) => {
+    const response = await map?.view.hitTest(event);
+    const result: any = response.results[0];
+
+    if (result) {
+      if (result.graphic.layer) {
+        const layer_name = result.graphic.layer.title;
+        if (layer_name === "Strip Map") {
+          map.view.rotation = 305;
+
+          // overview new extent
+          const attributes = result.graphic.attributes;
+          overviewLayer.definitionExpression =
+            "PageNumber = " + attributes["PageNumber"];
+
+          const extent = result.graphic.geometry.extent;
+          const new_extent = new Extent({
+            xmax: extent.xmax,
+            ymax: extent.ymax,
+            xmin: extent.xmin,
+            ymin: extent.ymin,
+            spatialReference: {
+              wkid: 102100,
+            },
+          });
+
+          overviewMap.extent = new_extent;
+          overviewMap.rotation = 360 - attributes["Angle"];
+          overviewMap.zoom = 17;
+
+          //--- Highlight selected strip
+          let highlight: any;
+          const selectedStrip = attributes["OBJECTID"];
+          if (selectedStrip) {
+            const layerView = await map?.whenLayerView(layer);
+            highlight = layerView.highlight(selectedStrip);
+            map?.view.on("click", () => {
+              highlight.remove();
+            });
+          }
+        }
+      }
+    }
+  });
+}
 
 //---------------------------------------------------------//
 //    Definition Expression using queryExpression          //
@@ -101,54 +167,26 @@ export async function dateUpdate(category: any) {
   ];
 
   const query = dateTable.createQuery();
-  const queryExpression =
-    "project = 'N2'" + " AND " + "category = '" + category + "'";
-  query.where = queryExpression; // "project = 'N2'" + ' AND ' + "category = 'Land Acquisition'";
+  query.where = `project = 'N2' AND category = '${category}'`;
 
-  return dateTable.queryFeatures(query).then((response: any) => {
-    const stats = response.features;
-    const dates = stats.map((result: any) => {
-      // get today and date recorded in the table
-      const today = new Date();
-      const date = new Date(result.attributes.date);
+  const response = await dateTable.queryFeatures(query);
+  const dates = response.features.map((result: any) => {
+    // get today and date recorded in the table
+    const today = new Date();
+    const date = new Date(result.attributes.date);
 
-      // Calculate the number of days passed since the last update
-      const time_passed = today.getTime() - date.getTime();
-      const days_passed = Math.round(time_passed / (1000 * 3600 * 24));
+    // Calculate the number of days passed since the last update
+    const time_passed = today.getTime() - date.getTime();
+    const days_passed = Math.round(time_passed / (1000 * 3600 * 24));
 
-      const year = date.getFullYear();
-      const month = monthList[date.getMonth()];
-      const day = date.getDate();
-      const final = year < 1990 ? "" : `${month} ${day}, ${year}`;
-      return [final, days_passed];
-    });
-    return dates;
+    const year = date.getFullYear();
+    const month = monthList[date.getMonth()];
+    const day = date.getDate();
+    const final = year < 1990 ? "" : `${month} ${day}, ${year}`;
+    return [final, days_passed];
   });
+  return dates;
 }
-
-//------------------------------------------------//
-//             Filter Pile CAP by CP              //
-//------------------------------------------------//
-// export function filterPileCapByCP(cp: any) {
-//   // cp = cp === "All" ? "N-01" : cp;
-
-//   const query_cp = cp === "All" ? "1=1" : "CP = '" + cp + "'";
-//   const query_cp2 = cp === "All" ? "1=1" : "GroupId = '" + cp + "'";
-//   pileCapLayer.definitionExpression = query_cp;
-//   pileCapLayer_overview.definitionExpression = query_cp;
-
-//   lotLayer.definitionExpression = query_cp;
-//   structureLayer.definitionExpression = query_cp;
-//   nloLayer.definitionExpression = query_cp;
-//   utilityPointLayer.definitionExpression = query_cp;
-//   stripMapLayer.definitionExpression = query_cp + " OR " + query_cp2;
-
-//   // Overview
-//   lotLayer_overview.definitionExpression = query_cp;
-//   structureLayer_overview.definitionExpression = query_cp;
-//   nloLayer_overview.definitionExpression = query_cp;
-//   utilityPointLayer_overview.definitionExpression = query_cp;
-// }
 
 //------------------------------------------------//
 //            Overview Map constraint             //

@@ -7,7 +7,7 @@ import { contractPackageNamesList } from "../UniqueValues";
 import { MyContext } from "../contexts/MyContext";
 
 export default function ContractPackageSegmentedList() {
-  const { updateContractpackage } = use(MyContext);
+  const { updateCpackage } = use(MyContext);
 
   const [contractPackageSelected, setConractPackageSelected] = useState<any>(
     contractPackageNamesList[1],
@@ -20,7 +20,7 @@ export default function ContractPackageSegmentedList() {
         <calcite-segmented-control
           oncalciteSegmentedControlChange={(event: any) => {
             setConractPackageSelected(event.target.selectedItem.id);
-            updateContractpackage(event.target.selectedItem.id);
+            updateCpackage(event.target.selectedItem.id);
           }}
           scale="m"
           width="full"

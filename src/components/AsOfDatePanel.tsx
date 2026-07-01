@@ -1,15 +1,20 @@
-import { useEffect, useState } from "react";
-import { dateUpdate } from "../Query";
 import { updatedDateCategoryNames } from "../UniqueValues";
+import { useQuery } from "@tanstack/react-query";
+import type { DisplayDates } from "../interfaceKeys";
+import { dateDisplayKeys } from "../interfaceKeys";
+import { dateUpdate } from "../Query";
 
 function AsOfDatePanel() {
-  const [asOfDate, setAsOfDate] = useState<undefined | any | unknown>(null);
+  const { data } = useQuery<DisplayDates | any>({
+    queryKey: [dateDisplayKeys.selected],
+    queryFn: () => dateUpdate(updatedDateCategoryNames),
+    select: (response) => {
+      return { asOfDate: response[0][0] };
+    },
+    staleTime: Infinity,
+  });
+  const asOfDate = data?.asOfDate || "";
 
-  useEffect(() => {
-    dateUpdate(updatedDateCategoryNames).then((response: any) => {
-      setAsOfDate(response[0][0]);
-    });
-  }, []);
   return (
     <>
       <div

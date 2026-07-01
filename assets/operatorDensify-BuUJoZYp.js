@@ -1,1 +1,0 @@
-import{Hb as s}from"./index-DpfcR4g-.js";import{ah as c}from"./ProjectionTransformation-Box8yoSY.js";const o=new c;function i(n,r,t,e){return o.execute(n,r,t,e,null)}function m(n,r,t,e){const u=o.executeMany(new s(n),r,t,e,null);return Array.from(u)}function p(){return o.supportsCurves()}export{m as o,i as t,p as u};

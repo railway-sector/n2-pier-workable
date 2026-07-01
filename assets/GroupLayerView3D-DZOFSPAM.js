@@ -1,1 +1,0 @@
-import{j8 as r,xu as t,wa as o}from"./index-DpfcR4g-.js";import{h as s}from"./GroupLayerView-DpVtn_7A.js";import"./LayerView-BUTKABHF.js";let e=class extends s{constructor(){super(...arguments),this.type="group"}};r([t()],e.prototype,"view",void 0),e=r([o("esri.views.3d.layers.GroupLayerView3D")],e);const m=e;export{m as default};

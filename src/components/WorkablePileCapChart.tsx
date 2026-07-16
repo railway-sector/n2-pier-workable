@@ -1,8 +1,6 @@
 import { use, useEffect, useRef, useState } from "react";
 import { MyContext } from "../contexts/MyContext";
-import { chartRenderer } from "../ChartRenderer";
-import { piechart, pileCapLayer } from "../layers";
-import { name_to_workable_fields, workableStatusArray } from "../UniqueValues";
+import { pileCapLayer } from "../layers";
 import {
   chartSetter,
   legendSetter,
@@ -11,29 +9,41 @@ import {
 } from "../chartSetter";
 import type { ChartResponse } from "../interfaceKeys";
 import { useQuery } from "@tanstack/react-query";
+import ChartPieSeriesRender from "chart-pie-series-render";
+import { makeQuery, pieChartData, PieChartRenderType } from "../query";
+import ChartPieSeries from "chart-pie-series";
+import { cp_f, work_name_to_field, work_status_q } from "../uniqueValue";
 
 const WorkablePileCapChart = () => {
   const { cpackage, component } = use(MyContext);
+  const arcgisMap = document.querySelector("arcgis-map");
+
   const [_chartPanelwidth, setChartPanelwidth] = useState<any>();
-  const status_statistic_field = name_to_workable_fields.filter(
+
+  const statistic_f = work_name_to_field.filter(
     (item: any) => item.name === component,
   )[0].field;
 
+  //--- Common qValues and qFields for QueryExpressionLayers class
+  const qV = [cpackage === "All" ? undefined : cpackage];
+  const qF = [cp_f];
+
+  const queryc = makeQuery(qV, qF);
+
   const { data } = useQuery<ChartResponse | any>({
-    queryKey: [cpackage, status_statistic_field, component, pileCapLayer],
+    queryKey: [cpackage, statistic_f, component, pileCapLayer],
     queryFn: async () => {
-      piechart.qChart = cpackage === "All" ? "1=1" : `CP = '${cpackage}'`;
-      piechart.layer = pileCapLayer;
-      piechart.statusList = workableStatusArray;
-      piechart.statusField = status_statistic_field;
-      piechart.statisticField = status_statistic_field;
-      piechart.statisticType = "count";
+      const chartData = await pieChartData({
+        piechart: new ChartPieSeries(),
+        qChart: queryc,
+        layer: pileCapLayer,
+        statusList: work_status_q,
+        statusField: statistic_f,
+        statisticField: statistic_f,
+        statisticType: "count",
+      });
 
-      const chartData = await piechart.chartDataPieSeries();
-
-      return {
-        chartData: chartData[0] || [],
-      };
+      return { chartData: chartData[0] || [] };
     },
   });
   const chartData = data?.chartData || [];
@@ -52,17 +62,17 @@ const WorkablePileCapChart = () => {
     const chart = chartSetter({ root: root, y: -15 });
     chartRef.current = chart;
 
-    // Create series
     const pieSeries = seriesSetter({
       chart: chart,
       root: root,
       categoryField: "category",
       valueField: "value",
-      legendValueText: "{valuePercentTotal.formatNumber('#.')}% ({value})",
+      legendValueText:
+        "[#000000]{valuePercentTotal.formatNumber('#.')}% ({value})",
       radius: 55,
       innerRadius: 35,
       legendLabelText:
-        '{category}[/] ([#000000; bold]{value.formatNumber("#.")}[/]) ',
+        '[#000000]{category}[/][#000000] ([#000000; bold]{value.formatNumber("#.")}[/][#000000])',
     });
     pieSeriesRef.current = pieSeries;
     chart.series.push(pieSeries);
@@ -79,17 +89,26 @@ const WorkablePileCapChart = () => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    chartRenderer({
-      chart: chart,
+    PieChartRenderType({
+      render: new ChartPieSeriesRender(),
+      chart,
       pieSeries: pieSeries,
-      legend: legend,
-      root: root,
+      legend,
+      root,
+      qChart: queryc,
+      q2Expression: undefined,
+      status_field: statistic_f,
+      view: arcgisMap?.view,
       updateChartPanelwidth: setChartPanelwidth,
       data: chartData,
-      pieSeriesScale: new_pieSeriesScale,
-      pieInnerLabel: "TOTAL PILE CAP",
-      pieInnerLabelFontSize: new_pieInnerLabelFontSize,
-      pieInnerValueFontSize: new_pieInnerValueFontSize,
+      seriesScale: new_pieSeriesScale,
+      innerLabel: "TOTAL PILE CAP",
+      innerLabelFontSize: new_pieInnerLabelFontSize,
+      innerValueFontSize: new_pieInnerValueFontSize,
+      layer: pileCapLayer,
+      statusArray: work_status_q,
+      bkg_color_switch: true,
+      seriesFillHash: undefined,
     });
 
     pieSeries.appear(1000, 100);

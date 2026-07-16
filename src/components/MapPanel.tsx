@@ -13,10 +13,8 @@ import "@arcgis/map-components/components/arcgis-print";
 import {
   basemapUserDefined,
   cp_break_lines,
-  layerInfos,
   lotLayer,
   lotLayer_overview,
-  monopilesLayer,
   n2CenterlineOverView,
   n2StationLayer,
   n2StationLayer_overview,
@@ -26,17 +24,17 @@ import {
   pileCapLayer_overview,
   prowLayer,
   prowLayer_overview,
-  queryRenderArray,
   stripMapLayer,
   stripMapLayer_overview,
   structureLayer,
   structureLayer_overview,
   utilityPointLayer,
   utilityPointLayer_overview,
+  layerInfos,
+  pcap_render_q,
 } from "../layers";
 import "@esri/calcite-components/dist/components/calcite-button";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
-import { home_center, home_rotation, overViewCenter } from "../UniqueValues";
 import ActionPanel from "./ActionPanel";
 import {
   addLayersToMap,
@@ -44,11 +42,12 @@ import {
   queryDefinitionExpression,
   stripMapRenderer,
   zoomToLayer,
-} from "../Query";
+} from "../query";
 import WorkablePileCapChart from "./WorkablePileCapChart";
 import { MyContext } from "../contexts/MyContext";
 import type { ArcgisMap } from "@arcgis/map-components/dist/components/arcgis-map";
 import type { ArcgisLegend } from "@arcgis/map-components/components/arcgis-legend";
+import { home_center, home_rotation, overViewCenter } from "../uniqueValue";
 
 function MapPanel() {
   const { cpackage, component } = use(MyContext);
@@ -78,7 +77,6 @@ function MapPanel() {
   );
 
   arcgisMap?.viewOnReady(() => {
-    //--- Map
     arcgisMap.view.ui.add(paneExpand, "top-right");
     addLayersToMap(arcgisMap?.map, [
       prowLayer,
@@ -90,14 +88,13 @@ function MapPanel() {
       n2StationLayer,
       cp_break_lines,
       stripMapLayer,
-      monopilesLayer,
     ]);
     arcgisMap.hideAttribution = true;
     arcgisMapLegend.layerInfos = layerInfos;
     arcgisMapLegend.hideLayersNotInCurrentView = false;
     arcgisMapLegend.ignoreLayerVisibility = true;
 
-    //--- Overview map
+    // Overview map
     addLayersToMap(arcgisOverviewMap?.map, [
       prowLayer_overview,
       n2CenterlineOverView,
@@ -109,7 +106,6 @@ function MapPanel() {
       n2StationLayer_overview,
       stripMapLayer_overview,
     ]);
-
     arcgisOverviewMap.hideAttribution = true;
     arcgisOverviewMap && disableZooming(arcgisOverviewMap?.view);
   });
@@ -123,7 +119,7 @@ function MapPanel() {
       queryExpression: qe,
       featureLayer1: pileCapLayer,
       featureLayers2: [lotLayer, structureLayer, nloLayer, utilityPointLayer],
-      componentArray: queryRenderArray,
+      componentArray: pcap_render_q,
       componentSelected: component,
     });
 
@@ -136,7 +132,7 @@ function MapPanel() {
         nloLayer_overview,
         utilityPointLayer_overview,
       ],
-      componentArray: queryRenderArray,
+      componentArray: pcap_render_q,
       componentSelected: component,
     });
   }, [cpackage, component]);

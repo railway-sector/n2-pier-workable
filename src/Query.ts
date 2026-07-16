@@ -10,9 +10,10 @@ import {
   utilityPointLayer,
   utilityPointLayer_overview,
 } from "./layers";
-import { home_rotation } from "./UniqueValues";
+import { home_rotation } from "./uniqueValue";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import Extent from "@arcgis/core/geometry/Extent";
+import QueryExpressionLayers from "query-layers-expression";
 
 //---------------------------------------------------------//
 //                 Add Layers to Map                      //
@@ -22,6 +23,126 @@ export function addLayersToMap(map: any, layersList: any[]) {
     map.add(layer);
   });
 }
+
+//---------------------------------------------//
+//               Pie chart                     //
+//---------------------------------------------//
+// 'piechart' = constant declared from class ChartPieSeries in layers.ts
+interface pieChartDataType {
+  piechart: any;
+  qChart: any;
+  layer: any;
+  statusList: any;
+  statusField: any;
+  statisticField: any;
+  statisticType: "sum" | "count";
+}
+export async function pieChartData({
+  piechart,
+  qChart,
+  layer,
+  statusList,
+  statusField,
+  statisticField,
+  statisticType,
+}: pieChartDataType) {
+  piechart.qChart = qChart.queryExpression();
+  piechart.layer = layer;
+  piechart.statusList = statusList;
+  piechart.statusField = statusField;
+  piechart.statisticField = statisticField;
+  piechart.statisticType = statisticType;
+
+  return await piechart.chartDataPieSeries();
+}
+
+//--- Chart Render helper function
+// `pieChartRender` function helps to assign parameter names to class `ChartPieSeriesRender`
+interface PieChartRenderType {
+  render: any | null; // the first instance of new ChartPieSeriesRender
+  chart: any; // amChart
+  pieSeries: any;
+  legend: any;
+  root: any;
+  qChart: any;
+  q2Expression?: any;
+  status_field: any;
+  view: any;
+  updateChartPanelwidth: any;
+  data: any;
+  seriesScale: any;
+  innerLabel?: any;
+  innerLabelFontSize?: any;
+  innerValueFontSize?: any;
+  layer: FeatureLayer | any;
+  statusArray: StatusQueryItem[];
+  bkg_color_switch?: boolean;
+  seriesFillHash?: boolean;
+}
+
+interface StatusQueryItem {
+  category: string;
+  value: number | string;
+  color: string;
+}
+
+export async function PieChartRenderType({
+  render,
+  chart,
+  pieSeries,
+  legend,
+  root,
+  qChart,
+  q2Expression,
+  status_field,
+  view,
+  updateChartPanelwidth,
+  data,
+  seriesScale,
+  innerLabel,
+  innerLabelFontSize,
+  innerValueFontSize,
+  layer,
+  statusArray,
+  bkg_color_switch,
+  seriesFillHash,
+}: PieChartRenderType) {
+  render.chart = chart;
+  render.pieSeries = pieSeries;
+  render.legend = legend;
+  render.root = root;
+  render.qChart = qChart;
+  render.q2Expression = q2Expression;
+  render.status_field = status_field;
+  render.view = view;
+  render.updateChartPanelwidth = updateChartPanelwidth;
+  render.data = data;
+  render.seriesScale = seriesScale;
+  render.innerLabel = innerLabel;
+  render.innerLabelFontSize = innerLabelFontSize;
+  render.innerValueFontSize = innerValueFontSize;
+  render.layer = layer;
+  render.statusArray = statusArray;
+  render.bkg_color_switch = bkg_color_switch;
+  render.seriesFillHash = seriesFillHash;
+
+  return await render.chartDataRenderer();
+}
+
+//--- Returns query expression
+export const makeQuery = (
+  qValues: string[],
+  qFields: string[],
+  qExpression?: string,
+  q2Expression?: string,
+) => {
+  const q = new QueryExpressionLayers();
+  q.qValues = qValues;
+  q.qFields = qFields;
+  if (qExpression) q.qExpression = qExpression;
+  if (q2Expression) q.q2Expression = q2Expression;
+  return q;
+};
 
 //---------------------------------------------------------//
 //                 StripMap  Renderer                      //
@@ -54,9 +175,7 @@ export async function stripMapRenderer(
             ymax: extent.ymax,
             xmin: extent.xmin,
             ymin: extent.ymin,
-            spatialReference: {
-              wkid: 102100,
-            },
+            spatialReference: { wkid: 102100 },
           });
 
           overviewMap.extent = new_extent;
@@ -150,42 +269,34 @@ export function lastDateOfMonth(date: Date) {
 }
 
 // Updat date
-export async function dateUpdate(category: any) {
-  const monthList = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+export function yearMonthDay(date: Date) {
+  return {
+    year: date?.getFullYear() ?? 0,
+    month: date?.getMonth() + 1,
+    day: date?.getDate(),
+  };
+}
 
+export function toAsofdate(date: Date) {
+  //--- Return displayed date: (as of date)
+  const { year, day } = yearMonthDay(date);
+  const cmonth = date?.toLocaleString("en-US", { month: "long" });
+
+  return year <= 1970 ? "" : `${cmonth} ${day}, ${year}`;
+}
+
+export async function dateUpdate(category: string) {
+  //--- Only executed during an initial render
   const query = dateTable.createQuery();
-  query.where = `project = 'N2' AND category = '${category}'`;
+  query.where = `project = 'SC' AND category = '${category}'`;
 
-  const response = await dateTable.queryFeatures(query);
-  const dates = response.features.map((result: any) => {
-    // get today and date recorded in the table
-    const today = new Date();
-    const date = new Date(result.attributes.date);
+  const { features } = await dateTable.queryFeatures(query);
+  return features.map(({ attributes }: any) => {
+    const date = new Date(attributes.date);
+    const asofdate = toAsofdate(date);
 
-    // Calculate the number of days passed since the last update
-    const time_passed = today.getTime() - date.getTime();
-    const days_passed = Math.round(time_passed / (1000 * 3600 * 24));
-
-    const year = date.getFullYear();
-    const month = monthList[date.getMonth()];
-    const day = date.getDate();
-    const final = year < 1990 ? "" : `${month} ${day}, ${year}`;
-    return [final, days_passed];
+    return asofdate;
   });
-  return dates;
 }
 
 //------------------------------------------------//

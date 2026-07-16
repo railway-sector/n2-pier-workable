@@ -1,17 +1,13 @@
-import { useState, use } from "react";
+import { use } from "react";
 import "../index.css";
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
 import "@esri/calcite-components/dist/components/calcite-segmented-control-item";
 import "@esri/calcite-components/dist/components/calcite-label";
-import { componentNamesList } from "../UniqueValues";
 import { MyContext } from "../contexts/MyContext";
+import { work_name_to_field } from "../uniqueValue";
 
 export default function ComponentSegmentedList() {
-  const { updateComponent } = use(MyContext);
-
-  const [componentSelected, setComponentSelected] = useState<any>(
-    componentNamesList[0],
-  );
+  const { updateComponent, component } = use(MyContext);
 
   return (
     <>
@@ -19,22 +15,21 @@ export default function ComponentSegmentedList() {
         Pre-construction Work
         <calcite-segmented-control
           oncalciteSegmentedControlChange={(event: any) => {
-            setComponentSelected(event.target.selectedItem.id);
             updateComponent(event.target.selectedItem.id);
           }}
           scale="m"
           width="full"
         >
-          {componentSelected &&
-            componentNamesList.map((category: any, index: any) => {
+          {component &&
+            work_name_to_field.map((f: any, index: any) => {
               return (
                 <calcite-segmented-control-item
-                  {...(componentSelected === category ? { checked: true } : {})}
+                  {...(component === f.name ? { checked: true } : {})}
                   key={index}
-                  value={category}
-                  id={category}
+                  value={f.name}
+                  id={f.name}
                 >
-                  {category}
+                  {f.name}
                 </calcite-segmented-control-item>
               );
             })}

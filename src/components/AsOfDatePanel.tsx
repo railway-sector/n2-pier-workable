@@ -1,19 +1,16 @@
-import { updatedDateCategoryNames } from "../UniqueValues";
+import { memo } from "react";
+import { dateUpdate } from "../query";
 import { useQuery } from "@tanstack/react-query";
-import type { DisplayDates } from "../interfaceKeys";
-import { dateDisplayKeys } from "../interfaceKeys";
-import { dateUpdate } from "../Query";
 
-function AsOfDatePanel() {
-  const { data } = useQuery<DisplayDates | any>({
-    queryKey: [dateDisplayKeys.selected],
-    queryFn: () => dateUpdate(updatedDateCategoryNames),
-    select: (response) => {
-      return { asOfDate: response[0][0] };
-    },
+//- Use `memo` to prevent re-rendering the Component
+//- when the obstruction elements are changed.
+const AsOfDatePanel = memo(() => {
+  const { data } = useQuery<any>({
+    queryKey: ["As_Of_Date"],
+    queryFn: () => dateUpdate("Viaduct"),
     staleTime: Infinity,
   });
-  const asOfDate = data?.asOfDate || "";
+  const asofdate = data ?? "";
 
   return (
     <>
@@ -30,10 +27,10 @@ function AsOfDatePanel() {
           left: "20px",
         }}
       >
-        As of {asOfDate}
+        {!asofdate ? "" : "As of " + asofdate}
       </div>
     </>
   );
-}
+});
 
 export default AsOfDatePanel;

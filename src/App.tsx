@@ -5,7 +5,7 @@ import "@arcgis/map-components/components/arcgis-map";
 import "@arcgis/map-components/components/arcgis-zoom";
 import "@arcgis/map-components/components/arcgis-legend";
 import "@esri/calcite-components/dist/components/calcite-shell";
-import { contractPackageNamesList, componentNamesList } from "./UniqueValues";
+import { cpackages, work_name_to_field } from "./uniqueValue";
 import MapPanel from "./components/MapPanel";
 import AsOfDatePanel from "./components/AsOfDatePanel";
 import { MyContext } from "./contexts/MyContext";
@@ -20,10 +20,10 @@ export function App(): React.JSX.Element {
     authenticate(setLoggedInState, "gCCFDRw5QmlAzzqy");
   }, []);
 
-  const [cpackage, setContractPackage] = useState<any>(
-    contractPackageNamesList[1],
+  const [cpackage, setContractPackage] = useState<any>(cpackages[1]);
+  const [component, setComponentNames] = useState<any>(
+    work_name_to_field[0].name,
   );
-  const [component, setComponentNames] = useState<any>(componentNamesList[0]);
 
   const updateCpackage = (newContractPackage: any) => {
     setContractPackage(newContractPackage);

@@ -14,67 +14,40 @@ import {
   basemapUserDefined,
   cp_break_lines,
   lotLayer,
-  lotLayer_overview,
-  n2CenterlineOverView,
   n2StationLayer,
-  n2StationLayer_overview,
   nloLayer,
-  nloLayer_overview,
   pileCapLayer,
-  pileCapLayer_overview,
   prowLayer,
-  prowLayer_overview,
   stripMapLayer,
-  stripMapLayer_overview,
   structureLayer,
-  structureLayer_overview,
   utilityPointLayer,
-  utilityPointLayer_overview,
   layerInfos,
   pcap_render_q,
 } from "../layers";
 import "@esri/calcite-components/dist/components/calcite-button";
-import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import ActionPanel from "./ActionPanel";
 import {
   addLayersToMap,
-  disableZooming,
   queryDefinitionExpression,
-  stripMapRenderer,
   zoomToLayer,
 } from "../query";
 import WorkablePileCapChart from "./WorkablePileCapChart";
 import { MyContext } from "../contexts/MyContext";
 import type { ArcgisMap } from "@arcgis/map-components/dist/components/arcgis-map";
 import type { ArcgisLegend } from "@arcgis/map-components/components/arcgis-legend";
-import { home_center, home_rotation, overViewCenter } from "../uniqueValue";
+import { home_center, home_rotation } from "../uniqueValue";
+import MapOverview from "./MapOverview";
 
 function MapPanel() {
   const { cpackage, component } = use(MyContext);
 
   const arcgisMap = document.querySelector("#arcgis-map") as ArcgisMap;
-  const arcgisOverviewMap = document.querySelector(
-    "#arcgis-overview-map",
-  ) as ArcgisMap;
-  const arcgisMapLegend = document.querySelector(
-    "arcgis-legend",
-  ) as ArcgisLegend;
+  const mapLegend = document.querySelector("arcgis-legend") as ArcgisLegend;
 
   const [_mapView, setMapView] = useState<any>();
 
   //--- Expand (Action Panel)
   const paneExpand: any = document.querySelector("actionpanel-expand");
-  const [actionPanelExpanded, setActionPanelExpanded] = useState(true);
-
-  reactiveUtils.when(
-    () => paneExpand?.expanded === false,
-    () => setActionPanelExpanded(false),
-  );
-
-  reactiveUtils.when(
-    () => paneExpand?.expanded === true,
-    () => setActionPanelExpanded(true),
-  );
 
   arcgisMap?.viewOnReady(() => {
     arcgisMap.view.ui.add(paneExpand, "top-right");
@@ -90,24 +63,9 @@ function MapPanel() {
       stripMapLayer,
     ]);
     arcgisMap.hideAttribution = true;
-    arcgisMapLegend.layerInfos = layerInfos;
-    arcgisMapLegend.hideLayersNotInCurrentView = false;
-    arcgisMapLegend.ignoreLayerVisibility = true;
-
-    // Overview map
-    addLayersToMap(arcgisOverviewMap?.map, [
-      prowLayer_overview,
-      n2CenterlineOverView,
-      lotLayer_overview,
-      structureLayer_overview,
-      pileCapLayer_overview,
-      nloLayer_overview,
-      utilityPointLayer_overview,
-      n2StationLayer_overview,
-      stripMapLayer_overview,
-    ]);
-    arcgisOverviewMap.hideAttribution = true;
-    arcgisOverviewMap && disableZooming(arcgisOverviewMap?.view);
+    mapLegend.layerInfos = layerInfos;
+    mapLegend.hideLayersNotInCurrentView = false;
+    mapLegend.ignoreLayerVisibility = true;
   });
 
   useEffect(() => {
@@ -122,32 +80,11 @@ function MapPanel() {
       componentArray: pcap_render_q,
       componentSelected: component,
     });
-
-    queryDefinitionExpression({
-      queryExpression: qe,
-      featureLayer1: pileCapLayer_overview,
-      featureLayers2: [
-        lotLayer_overview,
-        structureLayer_overview,
-        nloLayer_overview,
-        utilityPointLayer_overview,
-      ],
-      componentArray: pcap_render_q,
-      componentSelected: component,
-    });
   }, [cpackage, component]);
 
   useEffect(() => {
-    zoomToLayer(pileCapLayer, arcgisMap);
+    zoomToLayer(stripMapLayer, arcgisMap);
   }, [cpackage]);
-
-  //--- Overview Map renderer
-  stripMapRenderer(
-    stripMapLayer,
-    stripMapLayer_overview,
-    arcgisMap,
-    arcgisOverviewMap,
-  );
 
   return (
     <arcgis-map
@@ -176,7 +113,7 @@ function MapPanel() {
         expanded
       >
         <div style={{ maxHeight: "200px" }}>
-          <ActionPanel id={actionPanelExpanded} />
+          <ActionPanel />
         </div>
       </arcgis-expand>
 
@@ -246,24 +183,7 @@ function MapPanel() {
       {/*------------------------------------------------------------ */}
       {/* Overview Map */}
       <arcgis-expand id="overview-expanded" slot="bottom-right">
-        <div>
-          <arcgis-map
-            style={{
-              width: "75.9vw",
-              height: "40vh",
-              position: "relative",
-              borderStyle: "solid",
-              borderColor: "grey",
-              borderWidth: "1.7px",
-            }}
-            id="arcgis-overview-map"
-            basemap={basemapUserDefined}
-            ground="world-elevation"
-            zoom={16}
-            rotation={305}
-            center={overViewCenter}
-          ></arcgis-map>
-        </div>
+        <MapOverview />
       </arcgis-expand>
     </arcgis-map>
   );

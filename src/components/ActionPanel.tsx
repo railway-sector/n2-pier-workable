@@ -2,14 +2,10 @@ import "@esri/calcite-components/dist/components/calcite-card";
 import ContractPackageSegmentedList from "./ContractPackageContext";
 import ComponentSegmentedList from "./ComponentContext";
 
-const ActionPanel = (props: any) => {
+const ActionPanel = () => {
   return (
     <>
-      <div
-        style={{
-          display: props.id === true ? "block" : "none",
-        }}
-      >
+      <div>
         <calcite-card style={{ fontSize: "0.5rem" }}>
           <ContractPackageSegmentedList />
           <ComponentSegmentedList />

@@ -233,6 +233,7 @@ export const lotLayer_overview = new FeatureLayer({
   outFields: ["LotID"],
   definitionExpression: "OwnershipType = 0 and Obstruction = 'Yes'",
   maxScale: 0,
+  popupEnabled: false,
   elevationInfo: { mode: "on-the-ground" },
 });
 

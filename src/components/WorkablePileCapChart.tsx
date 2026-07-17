@@ -45,6 +45,9 @@ const WorkablePileCapChart = () => {
 
       return { chartData: chartData[0] || [] };
     },
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
   const chartData = data?.chartData || [];
 

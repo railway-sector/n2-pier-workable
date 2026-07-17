@@ -108,10 +108,7 @@ export const cp_brkline_label = new LabelClass({
 });
 
 export const cp_brkline_renderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#4ce600",
-    width: "2px",
-  }),
+  symbol: new SimpleLineSymbol({ color: "#4ce600", width: "2px" }),
 });
 
 //--- PROW LAYER ---//

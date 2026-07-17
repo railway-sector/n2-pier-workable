@@ -1,15 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import {
-  dateTable,
-  lotLayer,
-  lotLayer_overview,
-  nloLayer,
-  nloLayer_overview,
-  structureLayer,
-  structureLayer_overview,
-  utilityPointLayer,
-  utilityPointLayer_overview,
-} from "./layers";
+import { dateTable } from "./layers";
 import { home_rotation } from "./uniqueValue";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import Extent from "@arcgis/core/geometry/Extent";
@@ -394,15 +384,3 @@ export function homeExtentRenderer(view: any) {
   view.scale = 577790.5542885;
   view.center = home_center;
 }
-
-export const layersVisibleFalse = () => {
-  lotLayer.visible = false;
-  structureLayer.visible = false;
-  nloLayer.visible = false;
-  utilityPointLayer.visible = false;
-
-  lotLayer_overview.visible = false;
-  structureLayer_overview.visible = false;
-  nloLayer_overview.visible = false;
-  utilityPointLayer_overview.visible = false;
-};

@@ -597,7 +597,7 @@ export const lotIdLabel = new LabelClass({
   labelExpressionInfo: { expression: "$feature.LotID" },
   symbol: {
     type: "text",
-    color: "black", //'#E1E1E1',
+    color: "black",
     haloColor: "#E1E1E1",
     haloSize: 0.35,
     font: { size: 9 },

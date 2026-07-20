@@ -73,8 +73,8 @@ const MapOverview = () => {
         nloLayer_overview,
         utilityPointLayer_overview,
       ],
-      componentArray: pcap_render_q,
-      componentSelected: component,
+      array: pcap_render_q,
+      selectedItem: component,
     });
 
     stripMapRenderer(

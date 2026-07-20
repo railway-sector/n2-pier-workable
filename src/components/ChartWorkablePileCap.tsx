@@ -1,4 +1,4 @@
-import { use, useEffect, useRef, useState } from "react";
+import { memo, use, useEffect, useRef, useState } from "react";
 import { MyContext } from "../contexts/MyContext";
 import { pileCapLayer } from "../layers";
 import {
@@ -10,11 +10,11 @@ import {
 import type { ChartResponse } from "../interfaceKeys";
 import { useQuery } from "@tanstack/react-query";
 import ChartPieSeriesRender from "chart-pie-series-render";
-import { makeQuery, pieChartData, PieChartRenderType } from "../query";
+import { makeQuery, pieChartData, PieChartRender } from "../query";
 import ChartPieSeries from "chart-pie-series";
 import { cp_f, work_name_to_field, work_status_q } from "../uniqueValue";
 
-const WorkablePileCapChart = () => {
+const WorkablePileCapChart = memo(() => {
   const { cpackage, component } = use(MyContext);
   const arcgisMap = document.querySelector("arcgis-map");
 
@@ -92,7 +92,7 @@ const WorkablePileCapChart = () => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    PieChartRenderType({
+    PieChartRender({
       render: new ChartPieSeriesRender(),
       chart,
       pieSeries: pieSeries,
@@ -140,6 +140,6 @@ const WorkablePileCapChart = () => {
       }}
     ></div>
   );
-}; // End of lotChartgs
+}); // End of lotChartgs
 
 export default WorkablePileCapChart;

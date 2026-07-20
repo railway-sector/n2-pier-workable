@@ -1,1 +1,0 @@
-import{pz as r,ip as t,ix as s,hZ as e,kI as i}from"./index-BHVlkEMZ.js";let o=class extends r{constructor(p){super(p),this.sourcePoint=null,this.mapPoint=null}};t([s()],o.prototype,"sourcePoint",void 0),t([s({type:e})],o.prototype,"mapPoint",void 0),o=t([i("esri.layers.support.ControlPoint")],o);export{o as p};

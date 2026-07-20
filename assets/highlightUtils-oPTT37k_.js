@@ -1,1 +1,0 @@
-import{G5 as r,Ch as t,gH as a}from"./index-aV5kfHV2.js";function i(e){if(!e)return[];let n=r(e)?[e]:t.isCollection(e)?e.toArray():Array.isArray(e)?e:[];return n=n?.filter(a),(n?.length??0)===0?[]:n}function l(e){return!!(e&&typeof e=="object"&&"pixelRanges"in e&&e.pixelRanges)}function s(e){return Array.isArray(e.pixelRanges)&&e.pixelRanges.length===0}export{i,l as n,s as o};

@@ -10,9 +10,38 @@ import {
 import type { ChartResponse } from "../interfaceKeys";
 import { useQuery } from "@tanstack/react-query";
 import ChartPieSeriesRender from "chart-pie-series-render";
-import { makeQuery, pieChartData, PieChartRender } from "../query";
 import ChartPieSeries from "chart-pie-series";
 import { cp_f, work_name_to_field, work_status_q } from "../uniqueValue";
+import QueryExpressionLayers from "query-layers-expression";
+
+//---------------------//
+//    usePileCapData   //
+//---------------------//
+function usePileCapData(
+  cpackage: string,
+  component: string,
+  statistic_f: string,
+  query: any,
+) {
+  return useQuery<ChartResponse | any>({
+    queryKey: [cpackage, statistic_f, component, pileCapLayer],
+    queryFn: async () => {
+      const chartData = await new ChartPieSeries({
+        where: query.queryExpression(),
+        layer: pileCapLayer,
+        statusList: work_status_q,
+        statusField: statistic_f,
+        statisticField: statistic_f,
+        statisticType: "count",
+      }).pieSeries();
+
+      return { chartData };
+    },
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}
 
 const WorkablePileCapChart = memo(() => {
   const { cpackage, component } = use(MyContext);
@@ -24,31 +53,17 @@ const WorkablePileCapChart = memo(() => {
     (item: any) => item.name === component,
   )[0].field;
 
-  //--- Common qValues and qFields for QueryExpressionLayers class
-  const qV = [cpackage === "All" ? undefined : cpackage];
-  const qF = [cp_f];
-
-  const queryc = makeQuery(qV, qF);
-
-  const { data } = useQuery<ChartResponse | any>({
-    queryKey: [cpackage, statistic_f, component, pileCapLayer],
-    queryFn: async () => {
-      const chartData = await pieChartData({
-        piechart: new ChartPieSeries(),
-        qChart: queryc,
-        layer: pileCapLayer,
-        statusList: work_status_q,
-        statusField: statistic_f,
-        statisticField: statistic_f,
-        statisticType: "count",
-      });
-
-      return { chartData: chartData[0] || [] };
-    },
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+  const q1 = new QueryExpressionLayers({
+    qFields: [cp_f],
+    qValues: [cpackage === "All" ? undefined : cpackage],
   });
+
+  const { data, isLoading } = usePileCapData(
+    cpackage,
+    component,
+    statistic_f,
+    q1,
+  );
   const chartData = data?.chartData || [];
 
   const pieSeriesRef = useRef<unknown | any | undefined>({});
@@ -92,13 +107,12 @@ const WorkablePileCapChart = memo(() => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    PieChartRender({
-      render: new ChartPieSeriesRender(),
+    new ChartPieSeriesRender({
       chart,
       pieSeries: pieSeries,
       legend,
       root,
-      qChart: queryc,
+      qChart: q1,
       q2Expression: undefined,
       status_field: statistic_f,
       view: arcgisMap?.view,
@@ -112,7 +126,7 @@ const WorkablePileCapChart = memo(() => {
       statusArray: work_status_q,
       bkg_color_switch: true,
       seriesFillHash: undefined,
-    });
+    }).chartDataRenderer();
 
     pieSeries.appear(1000, 100);
 
@@ -137,6 +151,7 @@ const WorkablePileCapChart = memo(() => {
         borderWidth: "0.5px",
         borderColor: "grey",
         scrollbarWidth: "none",
+        opacity: isLoading ? 0 : 1,
       }}
     ></div>
   );

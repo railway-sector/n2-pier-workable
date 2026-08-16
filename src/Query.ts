@@ -3,7 +3,6 @@ import { dateTable } from "./layers";
 import { home_rotation } from "./uniqueValue";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import Extent from "@arcgis/core/geometry/Extent";
-import QueryExpressionLayers from "query-layers-expression";
 
 //---------------------------------------------------------//
 //                 Add Layers to Map                      //
@@ -13,89 +12,6 @@ export function addLayersToMap(map: any, layersList: any[]) {
     map.add(layer);
   });
 }
-
-//---------------------------------------------//
-//               Pie chart                     //
-//---------------------------------------------//
-// 'piechart' = constant declared from class ChartPieSeries in layers.ts
-interface pieChartDataType {
-  piechart: any;
-  qChart: any;
-  layer: any;
-  statusList: any;
-  statusField: any;
-  statisticField: any;
-  statisticType: "sum" | "count";
-}
-export async function pieChartData({
-  piechart,
-  qChart,
-  layer,
-  statusList,
-  statusField,
-  statisticField,
-  statisticType,
-}: pieChartDataType) {
-  Object.assign(piechart, {
-    qChart: qChart.queryExpression(),
-    layer,
-    statusList,
-    statusField,
-    statisticField,
-    statisticType,
-  });
-  return await piechart.chartDataPieSeries();
-}
-
-//--- Chart Render helper function
-// `pieChartRender` function helps to assign parameter names to class `ChartPieSeriesRender`
-interface PieChartRenderType {
-  render: any | null; // the first instance of new ChartPieSeriesRender
-  chart: any; // amChart
-  pieSeries: any;
-  legend: any;
-  root: any;
-  qChart: any;
-  q2Expression?: any;
-  status_field: any;
-  view: any;
-  updateChartPanelwidth: any;
-  data: any;
-  seriesScale: any;
-  innerLabel?: any;
-  innerLabelFontSize?: any;
-  innerValueFontSize?: any;
-  layer: FeatureLayer | any;
-  statusArray: StatusQueryItem[];
-  bkg_color_switch?: boolean;
-  seriesFillHash?: boolean;
-}
-
-interface StatusQueryItem {
-  category: string;
-  value: number | string;
-  color: string;
-}
-
-export async function PieChartRender({ render, ...props }: PieChartRenderType) {
-  Object.assign(render, props);
-  return await render.chartDataRenderer();
-}
-
-//--- Returns query expression
-export const makeQuery = (
-  qValues: string[],
-  qFields: string[],
-  qExpression?: string,
-  q2Expression?: string,
-) => {
-  const q = new QueryExpressionLayers();
-  q.qValues = qValues;
-  q.qFields = qFields;
-  if (qExpression) q.qExpression = qExpression;
-  if (q2Expression) q.q2Expression = q2Expression;
-  return q;
-};
 
 //---------------------------------------------------------//
 //                 StripMap  Renderer                      //

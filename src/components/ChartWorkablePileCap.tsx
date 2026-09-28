@@ -8,11 +8,14 @@ import {
   seriesSetter,
 } from "../chartSetter";
 import type { ChartResponse } from "../interfaceKeys";
-import { useQuery } from "@tanstack/react-query";
-import ChartPieSeriesRender from "chart-pie-series-render";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import ChartPieSeriesRender, {
+  thousands_separators,
+} from "chart-pie-series-render";
 import ChartPieSeries from "chart-pie-series";
 import { cp_f, work_name_to_field, work_status_q } from "../uniqueValue";
 import QueryExpressionLayers from "query-layers-expression";
+import { fieldStatistic } from "../query";
 
 //---------------------//
 //    usePileCapData   //
@@ -26,17 +29,26 @@ function usePileCapData(
   return useQuery<ChartResponse | any>({
     queryKey: [cpackage, statistic_f, component, pileCapLayer],
     queryFn: async () => {
-      const chartData = await new ChartPieSeries({
-        where: query.queryExpression(),
+      const baseArgs = {
         layer: pileCapLayer,
-        statusList: work_status_q,
-        statusField: statistic_f,
         statisticField: statistic_f,
-        statisticType: "count",
-      }).pieSeries();
+        statisticType: "count" as const,
+        where: query.queryExpression(),
+      };
 
-      return { chartData };
+      const [chartData, totalNumber] = await Promise.all([
+        new ChartPieSeries({
+          ...baseArgs,
+          statusList: work_status_q,
+          statusField: statistic_f,
+        }).pieSeries(),
+
+        fieldStatistic({ ...baseArgs }),
+      ]);
+
+      return { chartData, totalNumber };
     },
+    placeholderData: keepPreviousData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -50,7 +62,7 @@ const WorkablePileCapChart = memo(() => {
   const [_chartPanelwidth, setChartPanelwidth] = useState<any>();
 
   const statistic_f = work_name_to_field.filter(
-    (item: any) => item.name === component,
+    (f: any) => f.name === component,
   )[0].field;
 
   const q1 = new QueryExpressionLayers({
@@ -65,24 +77,47 @@ const WorkablePileCapChart = memo(() => {
     q1,
   );
   const chartData = data?.chartData || [];
+  const totalNumber = thousands_separators(data?.totalNumber || 0);
 
+  // 1. Land Acquisition
   const pieSeriesRef = useRef<unknown | any | undefined>({});
   const legendRef = useRef<unknown | any | undefined>({});
   const chartRef = useRef<unknown | any | undefined>({});
+  const renderRef = useRef<ChartPieSeriesRender | null>(null);
   const chartID = "pie-two";
 
-  const new_pieSeriesScale = 200;
-  const new_pieInnerValueFontSize = "1.3rem";
-  const new_pieInnerLabelFontSize = "0.55em";
+  const seriesScale = 200;
+  const innerValueFontSize = "1.3rem";
+  const innerLabelFontSize = "0.55em";
+
+  //--- Keep click-handler-relevant values fresh without rebuilding the
+  //    chart. view lives here too (not passed statically to the
+  //    renderer) since arcgis-scene's view may not be ready on first
+  //    mount.
+  const configRef = useRef({
+    qChart: q1,
+    q2Expression: undefined,
+    status_field: statistic_f,
+    view: arcgisMap?.view,
+  });
 
   useEffect(() => {
-    const root = rootSetter({ chartID: chartID });
-    const chart = chartSetter({ root: root, y: -15 });
-    chartRef.current = chart;
+    configRef.current = {
+      qChart: q1,
+      q2Expression: undefined,
+      status_field: statistic_f,
+      view: arcgisMap?.view,
+    };
+  }, [data, statistic_f, arcgisMap]);
 
+  //--- Pie Chart Renderer - created ONCE (mount only)
+  useEffect(() => {
+    const root = rootSetter({ chartID: chartID });
+    const chart = chartSetter({ root: root, centerY: 25, y: 10 });
+    chartRef.current = chart;
     const pieSeries = seriesSetter({
-      chart: chart,
-      root: root,
+      chart,
+      root,
       categoryField: "category",
       valueField: "value",
       legendValueText:
@@ -96,49 +131,57 @@ const WorkablePileCapChart = memo(() => {
     chart.series.push(pieSeries);
 
     const legend = legendSetter({
-      chart: chart,
-      root: root,
+      chart,
+      root,
       centerX: -16,
       scale: 1.4,
-      // marginTop: -10,
     });
     legendRef.current = legend;
     legend.setAll({ marginTop: -20 });
     legend.data.setAll(pieSeries.dataItems);
 
-    // Render chart
-    new ChartPieSeriesRender({
+    //--- NOTE: no `view` here — it's read live from configRef.current
+    //    inside chartrender.ts, since arcgis-scene may not have a
+    //    ready `.view` yet at this point.
+    const renderer = new ChartPieSeriesRender({
       chart,
-      pieSeries: pieSeries,
+      pieSeries,
       legend,
       root,
-      qChart: q1,
-      q2Expression: undefined,
-      status_field: statistic_f,
-      view: arcgisMap?.view,
+      configRef,
       updateChartPanelwidth: setChartPanelwidth,
-      data: chartData,
-      seriesScale: new_pieSeriesScale,
+      data: [],
+      seriesScale,
+      innerValue: totalNumber,
       innerLabel: "TOTAL PILE CAP",
-      innerLabelFontSize: new_pieInnerLabelFontSize,
-      innerValueFontSize: new_pieInnerValueFontSize,
+      innerLabelColor: "#000000",
+      innerLabelFontSize,
+      innerValueFontSize,
       layer: pileCapLayer,
       statusArray: work_status_q,
-      bkg_color_switch: true,
       seriesFillHash: undefined,
-    }).chartDataRenderer();
-
-    pieSeries.appear(1000, 100);
+    });
+    renderRef.current = renderer;
+    renderRef.current.chartDataRenderer();
 
     return () => {
       root.dispose();
+      renderRef.current = null;
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount-once — do not add dependencies here
 
+  //--- Push new data / inner value / affected-area figures into the
+  //    already-mounted chart. No dispose, no rebuild -> no blink.
+  //    NOTE: affectedAreaValue is NOT called here directly — it's
+  //    registered once inside chartrender.ts and reads live data via
+  //    closures, which updateData() keeps in sync. Calling it here on
+  //    every render would both miss the first paint and stack
+  //    duplicate adapters.
   useEffect(() => {
-    pieSeriesRef.current?.data.setAll(chartData);
-    legendRef.current?.data.setAll(pieSeriesRef.current.dataItems);
-  });
+    if (!renderRef.current) return;
+    renderRef.current.updateData(chartData, totalNumber, work_status_q);
+  }, [chartData, totalNumber, work_status_q]);
 
   return (
     <div

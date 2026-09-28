@@ -1,0 +1,1 @@
+import{ip as l,ix as a}from"./index-C1q8l0Ui.js";import{B as r}from"./FeatureLikeLayerView-NUcu8DgP.js";let t=class extends r{constructor(){super(...arguments),this.layer=null}get availableFields(){return this.layer.fieldsIndex.fields.map(e=>e.name)}};l([a({readOnly:!0})],t.prototype,"availableFields",null);export{t as l};
